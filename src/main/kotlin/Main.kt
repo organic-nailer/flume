@@ -43,9 +43,8 @@ fun main() {
         if (keyPressed) {
             keyPressed = false
             shell.taskRunners.rasterTaskRunner.postTask {
-                shell.rasterizer!!.drawToSurface(
-                    createRandomTree(width.toFloat(),height.toFloat())
-                )
+                shell.rasterizer!!.drawToSurface(createRandomTree(width.toFloat(),
+                    height.toFloat()))
                 shell.glView.swapBuffers()
             }
         }
@@ -56,7 +55,7 @@ fun main() {
 
 fun createRandomTree(width: Float, height: Float): LayerTree {
     val root = ContainerLayer()
-    val rect = Rect.makeXYWH(0f,0f,width, height)
+    val rect = Rect.makeXYWH(0f, 0f, width, height)
     val leaf = PictureLayer()
     val recorder = PictureRecorder()
     val canvas = recorder.beginRecording(rect)
@@ -76,7 +75,7 @@ fun createRandomTree(width: Float, height: Float): LayerTree {
     val opacityPicture = PictureLayer()
     val opacityRecorder = PictureRecorder()
     val opacityCanvas = opacityRecorder.beginRecording(rect)
-    opacityCanvas.drawCircle(0f,0f,60f, paint)
+    opacityCanvas.drawCircle(0f, 0f, 60f, paint)
     opacityPicture.picture = opacityRecorder.finishRecordingAsPicture()
     opacity.children.add(opacityPicture)
 

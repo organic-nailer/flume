@@ -8,7 +8,7 @@ import kotlin.math.min
 import kotlin.math.round
 
 abstract class OffsetBase(
-    private val dx: Double, private val dy: Double
+    private val dx: Double, private val dy: Double,
 ) {
     val isInfinite: Boolean
         get() = dx >= Double.POSITIVE_INFINITY || dy >= Double.POSITIVE_INFINITY
@@ -18,7 +18,7 @@ abstract class OffsetBase(
 }
 
 class Size(
-    val width: Double, val height: Double
+    val width: Double, val height: Double,
 ) : OffsetBase(width, height) {
     companion object {
         val zero = Size(0.0, 0.0)
@@ -27,17 +27,20 @@ class Size(
     val isEmpty = width <= 0.0 || height <= 0.0
 
     operator fun minus(other: OffsetBase): OffsetBase {
-        if(other is Offset) {
+        if (other is Offset) {
             return Size(width - other.dx, height - other.dy)
         }
-        if(other is Size) {
+        if (other is Size) {
             return Offset(width - other.width, height - other.height)
         }
         throw IllegalArgumentException()
     }
 
     fun and(other: Offset): Rect {
-        return Rect.makeXYWH(other.dx.toFloat(), other.dy.toFloat(), width.toFloat(), height.toFloat())
+        return Rect.makeXYWH(other.dx.toFloat(),
+            other.dy.toFloat(),
+            width.toFloat(),
+            height.toFloat())
     }
 
     fun contains(offset: Offset): Boolean {
@@ -73,12 +76,10 @@ class Offset(val dx: Double, val dy: Double) : OffsetBase(dx, dy) {
  * 矩形の和(Union)を取る
  */
 fun Rect.join(other: Rect): Rect {
-    return Rect(
-        min(this.left, other.left),
+    return Rect(min(this.left, other.left),
         min(this.top, other.top),
         max(this.right, other.right),
-        max(this.bottom, other.bottom)
-    )
+        max(this.bottom, other.bottom))
 }
 
 /**
@@ -87,9 +88,7 @@ fun Rect.join(other: Rect): Rect {
  * dxが正なら右へ、dyが正なら下へずれる
  */
 fun Rect.makeOffset(dx: Float, dy: Float): Rect {
-    return Rect(
-        this.left + dx, this.top + dy, this.right + dx, this.bottom + dy
-    )
+    return Rect(this.left + dx, this.top + dy, this.right + dx, this.bottom + dy)
 }
 
 fun Rect.makeOffset(offset: Offset): Rect {
@@ -97,9 +96,7 @@ fun Rect.makeOffset(offset: Offset): Rect {
 }
 
 fun Rect.roundOut(): Rect {
-    return Rect(
-        round(this.left), round(this.top), round(this.right), round(this.bottom)
-    )
+    return Rect(round(this.left), round(this.top), round(this.right), round(this.bottom))
 }
 
 val kEmptyRect: Rect = Rect.makeWH(0f, 0f)
@@ -124,9 +121,8 @@ fun Matrix33.invert(): Matrix33? {
     val a33 = mat[8]
     val det = a11 * a22 * a33 + a12 * a23 * a31 + a13 * a21 * a32
     -a13 * a22 * a31 - a12 * a21 * a33 - a11 * a23 * a32
-    if(abs(det) <= 1e-4) return null
-    return Matrix33(
-        (a22 * a33 - a23 * a22) / det,
+    if (abs(det) <= 1e-4) return null
+    return Matrix33((a22 * a33 - a23 * a22) / det,
         -(a12 * a33 - a13 * a22) / det,
         (a12 * a23 - a13 * a22) / det,
         -(a21 * a33 - a23 * a31) / det,
@@ -134,8 +130,7 @@ fun Matrix33.invert(): Matrix33? {
         -(a11 * a23 - a13 * a21) / det,
         (a21 * a32 - a22 * a31) / det,
         -(a11 * a32 - a12 * a31) / det,
-        (a11 * a22 - a12 * a21) / det
-    )
+        (a11 * a22 - a12 * a21) / det)
 }
 
 /**
@@ -151,18 +146,22 @@ fun Matrix33.mapRect(rect: Rect): Rect {
     val transformedBottomLeft = transform(bottomLeft)
     val transformedBottomRight = transform(bottomRight)
     return Rect(
-        minOf(
-            transformedTopLeft.dx, transformedTopRight.dx, transformedBottomLeft.dx, transformedBottomRight.dx
-        ).toFloat(),
-        minOf(
-            transformedTopLeft.dy, transformedTopRight.dy, transformedBottomLeft.dy, transformedBottomRight.dy
-        ).toFloat(),
-        maxOf(
-            transformedTopLeft.dx, transformedTopRight.dx, transformedBottomLeft.dx, transformedBottomRight.dx
-        ).toFloat(),
-        maxOf(
-            transformedTopLeft.dy, transformedTopRight.dy, transformedBottomLeft.dy, transformedBottomRight.dy
-        ).toFloat(),
+        minOf(transformedTopLeft.dx,
+            transformedTopRight.dx,
+            transformedBottomLeft.dx,
+            transformedBottomRight.dx).toFloat(),
+        minOf(transformedTopLeft.dy,
+            transformedTopRight.dy,
+            transformedBottomLeft.dy,
+            transformedBottomRight.dy).toFloat(),
+        maxOf(transformedTopLeft.dx,
+            transformedTopRight.dx,
+            transformedBottomLeft.dx,
+            transformedBottomRight.dx).toFloat(),
+        maxOf(transformedTopLeft.dy,
+            transformedTopRight.dy,
+            transformedBottomLeft.dy,
+            transformedBottomRight.dy).toFloat(),
     )
 }
 
