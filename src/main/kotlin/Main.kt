@@ -1,5 +1,6 @@
 import common.ContainerLayer
 import common.LayerTree
+import common.OpacityLayer
 import common.PictureLayer
 import engine.GLView
 import engine.Rasterizer
@@ -69,6 +70,17 @@ fun createRandomTree(width: Float, height: Float): LayerTree {
 
     leaf.picture = recorder.finishRecordingAsPicture()
     root.children.add(leaf)
+
+    val opacity = OpacityLayer(alpha = 150)
+
+    val opacityPicture = PictureLayer()
+    val opacityRecorder = PictureRecorder()
+    val opacityCanvas = opacityRecorder.beginRecording(rect)
+    opacityCanvas.drawCircle(0f,0f,60f, paint)
+    opacityPicture.picture = opacityRecorder.finishRecordingAsPicture()
+    opacity.children.add(opacityPicture)
+
+    root.children.add(opacity)
 
     return LayerTree().apply {
         rootLayer = root

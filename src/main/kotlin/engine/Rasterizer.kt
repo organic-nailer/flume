@@ -6,6 +6,8 @@ import org.jetbrains.skia.BackendRenderTarget
 import org.jetbrains.skia.ColorSpace
 import org.jetbrains.skia.DirectContext
 import org.jetbrains.skia.FramebufferFormat
+import org.jetbrains.skia.Paint
+import org.jetbrains.skia.Rect
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.SurfaceColorFormat
 import org.jetbrains.skia.SurfaceOrigin
@@ -32,6 +34,8 @@ class Rasterizer(
 
     fun drawToSurface(layerTree: LayerTree) {
         println("draw")
+
+        layerTree.preroll()
 
         surface.canvas.clear(0xFFFFFFFF.toInt())
         layerTree.paint(PaintContext(surface.canvas, context))
