@@ -2,11 +2,17 @@ import common.ContainerLayer
 import common.LayerTree
 import common.OpacityLayer
 import common.PictureLayer
+import common.Size
 import engine.GLView
 import engine.Rasterizer
 import engine.Shell
 import engine.TaskRunner
 import engine.TaskRunners
+import framework.RenderPipeline
+import framework.geometrics.BoxConstraints
+import framework.render.RenderColoredBox
+import framework.render.RenderConstrainedBox
+import framework.render.RenderView
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.PictureRecorder
 import org.jetbrains.skia.Rect
@@ -22,14 +28,15 @@ fun main() {
 
     val glView = GLView(width, height)
 
-    val shell = Shell(taskRunners, glView, null)
-
-    taskRunners.rasterTaskRunner.postTask {
-        println("in rasterThread")
-        val context = shell.glView.createContext()
-        val rasterizer = Rasterizer(width, height, context)
-        shell.rasterizer = rasterizer
+    val renderPipeline = RenderPipeline().apply {
+        renderView = RenderView(width.toDouble(), height.toDouble())
     }
+
+    val shell = Shell(taskRunners, glView, null, renderPipeline, width, height)
+
+    shell.initRasterThread()
+
+    shell.drawFrame()
 
     var keyPressed = false
 
@@ -42,11 +49,11 @@ fun main() {
     while (!shell.glView.windowShouldClose()) {
         if (keyPressed) {
             keyPressed = false
-            shell.taskRunners.rasterTaskRunner.postTask {
-                shell.rasterizer!!.drawToSurface(createRandomTree(width.toFloat(),
-                    height.toFloat()))
-                shell.glView.swapBuffers()
-            }
+            renderPipeline.renderView!!.child = RenderConstrainedBox(
+                additionalConstraints = BoxConstraints.tight(Size(100.0, 100.0)),
+                child = RenderColoredBox(0xFFFF0000.toInt())
+            )
+            shell.drawFrame()
         }
         shell.glView.pollEvents()
     }

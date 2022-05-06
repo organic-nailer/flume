@@ -80,7 +80,7 @@ open class OffsetLayer(
 ) : ContainerLayer() {}
 
 class TransformLayer(
-    val transform: Matrix33 = Matrix33.IDENTITY, offset: Offset,
+    val transform: Matrix33 = Matrix33.IDENTITY, offset: Offset = Offset.zero,
 ) : OffsetLayer(offset) {
 
     override fun preroll(context: PrerollContext, matrix: Matrix33) {
