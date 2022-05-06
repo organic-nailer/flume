@@ -1,19 +1,19 @@
 package engine
 
+import common.LayerTree
+import common.PaintContext
 import org.jetbrains.skia.BackendRenderTarget
 import org.jetbrains.skia.ColorSpace
 import org.jetbrains.skia.DirectContext
 import org.jetbrains.skia.FramebufferFormat
-import org.jetbrains.skia.Paint
 import org.jetbrains.skia.Surface
 import org.jetbrains.skia.SurfaceColorFormat
 import org.jetbrains.skia.SurfaceOrigin
 import org.lwjgl.opengl.GL11
-import kotlin.random.Random
 
 class Rasterizer(
-    private val width: Int,
-    private val height: Int,
+    width: Int,
+    height: Int,
     private val context: DirectContext,
 ) {
     private val surface: Surface
@@ -30,15 +30,11 @@ class Rasterizer(
             ColorSpace.sRGB)!!
     }
 
-    fun drawToSurface() {
+    fun drawToSurface(layerTree: LayerTree) {
         println("draw")
-        val paint = Paint().apply { color = 0xFFFF0000.toInt() }
-
-        val randomX = Random.nextFloat() * width
-        val randomY = Random.nextFloat() * height
 
         surface.canvas.clear(0xFFFFFFFF.toInt())
-        surface.canvas.drawCircle(randomX, randomY, 40f, paint)
+        layerTree.paint(PaintContext(surface.canvas, context))
 
         context.flush()
     }
