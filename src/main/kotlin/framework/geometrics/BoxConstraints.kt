@@ -13,7 +13,7 @@ class BoxConstraints(
             return BoxConstraints(size.width, size.width, size.height, size.height)
         }
 
-        fun tightFor(width: Double?, height: Double?): BoxConstraints {
+        fun tightFor(width: Double? = null, height: Double? = null): BoxConstraints {
             return BoxConstraints(width ?: 0.0,
                 width ?: Double.POSITIVE_INFINITY,
                 height ?: 0.0,
