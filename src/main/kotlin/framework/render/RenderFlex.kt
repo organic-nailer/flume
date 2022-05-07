@@ -9,6 +9,7 @@ import framework.geometrics.CrossAxisAlignment
 import framework.geometrics.MainAxisAlignment
 import framework.geometrics.MainAxisSize
 import framework.geometrics.VerticalDirection
+import framework.render.mixin.ContainerRenderObject
 import kotlin.math.max
 
 class RenderFlex(
@@ -17,13 +18,8 @@ class RenderFlex(
     val mainAxisSize: MainAxisSize = MainAxisSize.Max,
     val crossAxisAlignment: CrossAxisAlignment = CrossAxisAlignment.Center,
     val verticalDirection: VerticalDirection = VerticalDirection.Down,
-    val children: List<RenderBox> = listOf(),
-) : RenderBox() {
-    init {
-        children.forEach {
-            it.parentData = BoxParentData()
-        }
-    }
+) : RenderBox(), ContainerRenderObject<RenderBox> {
+    override val children: MutableList<RenderBox> = mutableListOf()
 
     private fun getMainSize(size: Size): Double {
         return when (direction) {
