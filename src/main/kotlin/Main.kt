@@ -4,25 +4,15 @@ import engine.GLView
 import engine.Shell
 import engine.TaskRunner
 import engine.TaskRunners
-import framework.RenderPipeline
 import framework.geometrics.Axis
-import framework.geometrics.BoxConstraints
 import framework.geometrics.MainAxisSize
 import framework.painting.BorderRadius
-import framework.render.RenderColoredBox
-import framework.render.RenderConstrainedBox
-import framework.render.RenderFlex
-import framework.render.RenderPositionedBox
-import framework.render.RenderView
 import framework.render.TextSpan
 import framework.render.clip.CustomClipper
-import framework.render.clip.RenderClipOval
-import framework.render.clip.RenderClipPath
-import framework.render.clip.RenderClipRRect
+import framework.runApp
 import framework.widget.Align
 import framework.widget.ColoredBox
 import framework.widget.Flex
-import framework.widget.RenderObjectToWidgetAdapter
 import framework.widget.RichText
 import framework.widget.SizedBox
 import framework.widget.Widget
@@ -42,15 +32,9 @@ fun main() {
 
     val glView = GLView(width, height)
 
-    val renderPipeline = RenderPipeline().apply {
-        renderView = RenderView(width.toDouble(), height.toDouble())
-    }
-
-    val shell = Shell(taskRunners, glView, null, renderPipeline, width, height)
+    val shell = Shell(taskRunners, glView, null, width, height)
 
     shell.initRasterThread()
-
-    shell.drawFrame()
 
     var keyPressed = false
 
@@ -63,11 +47,7 @@ fun main() {
     while (!shell.glView.windowShouldClose()) {
         if (keyPressed) {
             keyPressed = false
-            RenderObjectToWidgetAdapter(
-                createWidgetTree(),
-                renderPipeline.renderView!!
-            ).attachToRenderTree()
-            shell.drawFrame()
+            runApp(shell, createWidgetTree())
         }
         shell.glView.pollEvents()
     }
