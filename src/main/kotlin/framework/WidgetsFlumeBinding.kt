@@ -2,7 +2,9 @@ package framework
 
 import common.ContainerLayer
 import common.KeyEvent
+import framework.element.BuildOwner
 import framework.element.Element
+import framework.element.RenderObjectToWidgetElement
 import framework.render.RenderView
 import framework.widget.RenderObjectToWidgetAdapter
 import framework.widget.Widget
@@ -13,6 +15,7 @@ object WidgetsFlumeBinding : WidgetsBinding {
     var renderViewElement: Element? = null
     var initialized = false
     var engineConnected = false
+    var buildOwner: BuildOwner = BuildOwner { handleBuildScheduled() }
     override fun connectToEngine(engine: Engine) {
         this.engine = engine
         engineConnected = true
@@ -37,10 +40,16 @@ object WidgetsFlumeBinding : WidgetsBinding {
         engine.scheduleFrame()
     }
 
+    private fun handleBuildScheduled() {
+        ensureVisualUpdate()
+    }
+
     fun attachRootWidget(rootWidget: Widget) {
         val isBootstrapFrame = renderViewElement == null
         renderViewElement =
-            RenderObjectToWidgetAdapter(rootWidget, pipeline.renderView!!).attachToRenderTree()
+            RenderObjectToWidgetAdapter(rootWidget, pipeline.renderView!!).attachToRenderTree(
+                buildOwner,
+                renderViewElement as RenderObjectToWidgetElement<*>?)
         if (isBootstrapFrame) {
             ensureVisualUpdate()
         }
@@ -51,8 +60,18 @@ object WidgetsFlumeBinding : WidgetsBinding {
         drawFrame()
     }
 
-
+    /**
+     * 次フレームを描画する
+     *
+     * WidgetsBinding.drawFrame() -> RendererBinding.drawFrame()
+     */
     fun drawFrame() {
+        // WidgetsBinding.drawFrame
+        if (renderViewElement != null) {
+            buildOwner.buildScope()
+        }
+
+        // RendererBinding.drawFrame
         pipeline.flushLayout()
         pipeline.flushPaint()
         engine.render(pipeline.renderView!!.layer as ContainerLayer)

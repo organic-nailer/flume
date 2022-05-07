@@ -10,7 +10,8 @@ import framework.ViewConfiguration
 import framework.geometrics.BoxConstraints
 import framework.render.mixin.RenderObjectWithChild
 
-class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjectWithChild<RenderBox> {
+class RenderView(configuration: ViewConfiguration) : RenderObject(),
+        RenderObjectWithChild<RenderBox> {
     override var size: Size = configuration.size
     override var child: RenderBox? by RenderObjectWithChild.ChildDelegate()
     override val isRepaintBoundary: Boolean = true
@@ -28,6 +29,11 @@ class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjec
     override fun attach(owner: RenderPipeline) {
         super.attach(owner)
         attachChild(owner)
+    }
+
+    override fun detach() {
+        super.detach()
+        detachChild()
     }
 
     override fun visitChildren(visitor: RenderObjectVisitor) {

@@ -1,11 +1,14 @@
 package framework.widget
 
 import framework.render.RenderColoredBox
-import framework.render.RenderObject
 
 class ColoredBox(
     child: Widget? = null,
     val color: Int,
-) : SingleChildRenderObjectWidget(child) {
-    override fun createRenderObject(): RenderObject = RenderColoredBox(color)
+) : SingleChildRenderObjectWidget<RenderColoredBox>(child) {
+    override fun createRenderObject(): RenderColoredBox = RenderColoredBox(color)
+
+    override fun updateRenderObject(renderObject: RenderColoredBox) {
+        renderObject.color = color
+    }
 }

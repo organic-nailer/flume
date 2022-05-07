@@ -1,7 +1,6 @@
 package framework.widget.paint
 
 import common.Clip
-import framework.render.RenderObject
 import framework.render.clip.CustomClipper
 import framework.render.clip.RenderClipRect
 import framework.widget.SingleChildRenderObjectWidget
@@ -12,8 +11,15 @@ class ClipRect(
     val clipper: CustomClipper<Rect>? = null,
     val clipBehavior: Clip = Clip.AntiAlias,
     child: Widget? = null,
-) : SingleChildRenderObjectWidget(child) {
-    override fun createRenderObject(): RenderObject {
+) : SingleChildRenderObjectWidget<RenderClipRect>(child) {
+    override fun createRenderObject(): RenderClipRect {
         return RenderClipRect(clipper = clipper, clipBehavior = clipBehavior)
+    }
+
+    override fun updateRenderObject(renderObject: RenderClipRect) {
+        renderObject.let {
+            it.clipper = clipper
+            it.clipBehavior = clipBehavior
+        }
     }
 }

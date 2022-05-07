@@ -1,6 +1,7 @@
 package framework.render.clip
 
 import common.Clip
+import common.ClipPathLayer
 import common.Offset
 import framework.PaintingContext
 import org.jetbrains.skia.Path
@@ -13,12 +14,16 @@ class RenderClipOval(
         get() = size.and(Offset.zero)
 
     override fun paint(context: PaintingContext, offset: Offset) {
-        if (child != null) {
-            context.pushClipPath(offset,
+        if(child != null) {
+            updateClip()
+            layer = context.pushClipPath(
+                offset,
                 clip!!,
                 Path().apply { addOval(clip!!) },
                 { c, o -> super.paint(c, o) },
-                clipBehavior)
+                clipBehavior,
+                layer as ClipPathLayer?
+            )
         }
     }
 }

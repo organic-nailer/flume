@@ -6,6 +6,7 @@ import common.Size
 import framework.PaintingContext
 import framework.RenderPipeline
 import framework.geometrics.BoxConstraints
+import kotlin.reflect.KProperty
 
 abstract class RenderObject {
     companion object {
@@ -13,6 +14,7 @@ abstract class RenderObject {
             it.cleanRelayoutBounary()
         }
     }
+
     var parentData: ParentData? = null
     var parent: RenderObject? = null
     var needsPaint = true
@@ -24,7 +26,7 @@ abstract class RenderObject {
     var depth: Int = 0
 
     fun redepthChild(child: RenderObject) {
-        if(child.depth <= depth) {
+        if (child.depth <= depth) {
             child.depth = depth + 1
             child.redepthChildren()
         }
@@ -54,18 +56,18 @@ abstract class RenderObject {
 
     fun layout(constraints: BoxConstraints, parentUsesSize: Boolean = false) {
         // relayoutBoundaryの再計算
-        val relayoutBoundary = if(!parentUsesSize || sizedByParent || constraints.isTight || parent == null) {
-            this
-        }
-        else {
-            parent!!.relayoutBoundary
-        }
-        if(!needsLayout && this.constraints == constraints && this.relayoutBoundary == relayoutBoundary) {
+        val relayoutBoundary =
+            if (!parentUsesSize || sizedByParent || constraints.isTight || parent == null) {
+                this
+            } else {
+                parent!!.relayoutBoundary
+            }
+        if (!needsLayout && this.constraints == constraints && this.relayoutBoundary == relayoutBoundary) {
             // 制約とrelayoutBoundaryに変化がなく再レイアウト要求も無ければなにもしない
             return
         }
         this.constraints = constraints
-        if(this.relayoutBoundary != null && relayoutBoundary != this.relayoutBoundary) {
+        if (this.relayoutBoundary != null && relayoutBoundary != this.relayoutBoundary) {
             // relayoutBoundaryに更新があった場合、子のrelayoutBoundaryを一旦リセットする
             visitChildren(cleanChildRelayoutBoundary)
         }
@@ -89,7 +91,7 @@ abstract class RenderObject {
     }
 
     fun cleanRelayoutBounary() {
-        if(relayoutBoundary != this) {
+        if (relayoutBoundary != this) {
             relayoutBoundary = null
             needsLayout = true
             visitChildren(cleanChildRelayoutBoundary)
@@ -112,11 +114,10 @@ abstract class RenderObject {
     }
 
     fun markNeedsLayout() {
-        if(needsLayout) return
-        if(relayoutBoundary != this) {
+        if (needsLayout) return
+        if (relayoutBoundary != this) {
             markParentNeedsLayout()
-        }
-        else {
+        } else {
             needsLayout = true
             owner?.let {
                 it.nodesNeedingLayout.add(this)
@@ -133,10 +134,18 @@ abstract class RenderObject {
 
     open fun attach(owner: RenderPipeline) {
         this.owner = owner
+        if (needsLayout && relayoutBoundary != null) {
+            needsLayout = false
+            markNeedsLayout()
+        }
         if (needsPaint && layer != null) {
             needsPaint = false
             markNeedsPaint()
         }
+    }
+
+    open fun detach() {
+        this.owner = null
     }
 
     open fun setupParentData(child: RenderObject) {
@@ -154,12 +163,58 @@ abstract class RenderObject {
 
     fun adoptChild(child: RenderObject) {
         setupParentData(child)
+        markNeedsLayout()
         child.parent = this
         if (attached) {
             child.attach(owner!!)
         }
         redepthChild(child)
     }
+
+    fun dropChild(child: RenderObject) {
+        child.cleanRelayoutBounary()
+        child.parentData = null
+        child.parent = null
+        if (attached) {
+            child.detach()
+        }
+        markNeedsLayout()
+    }
+
+    /**
+     * RenderObjectを破棄する時に呼ぶ
+     *
+     * layerの参照を持っていれば捨てる
+     */
+    open fun dispose() {
+        layer = null
+    }
 }
 
 typealias RenderObjectVisitor = (child: RenderObject) -> Unit
+
+class MarkPaintProperty<T>(initialValue: T) {
+    var child: T = initialValue
+    operator fun getValue(thisRef: RenderObject, property: KProperty<*>): T {
+        return child
+    }
+
+    operator fun setValue(thisRef: RenderObject, property: KProperty<*>, value: T) {
+        if (child == value) return
+        child = value
+        thisRef.markNeedsPaint()
+    }
+}
+
+class MarkLayoutProperty<T>(initialValue: T) {
+    var child: T = initialValue
+    operator fun getValue(thisRef: RenderObject, property: KProperty<*>): T {
+        return child
+    }
+
+    operator fun setValue(thisRef: RenderObject, property: KProperty<*>, value: T) {
+        if (child == value) return
+        child = value
+        thisRef.markNeedsLayout()
+    }
+}
