@@ -6,6 +6,7 @@ import engine.TaskRunner
 import engine.TaskRunners
 import framework.RenderPipeline
 import framework.geometrics.BoxConstraints
+import framework.geometrics.MainAxisSize
 import framework.painting.BorderRadius
 import framework.render.RenderColoredBox
 import framework.render.RenderConstrainedBox
@@ -51,6 +52,7 @@ fun main() {
             keyPressed = false
             renderPipeline.renderView!!.child = RenderPositionedBox(
                 child = RenderFlex(
+                    mainAxisSize = MainAxisSize.Min,
                     children = listOf(
                         RenderClipPath(
                             clipper = ArcClipper(),
