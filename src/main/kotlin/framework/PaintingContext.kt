@@ -5,10 +5,13 @@ import common.ClipPathLayer
 import common.ClipRRectLayer
 import common.ClipRectLayer
 import common.ContainerLayer
+import common.Layer
 import common.Offset
+import common.OffsetLayer
 import common.OpacityLayer
 import common.PictureLayer
 import common.makeOffset
+import framework.render.RenderObject
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Path
 import org.jetbrains.skia.PictureRecorder
@@ -19,6 +22,28 @@ class PaintingContext(
     private val containerLayer: ContainerLayer,
     private val estimatedBounds: Rect,
 ) {
+    companion object {
+        /**
+         * [RenderObject.isRepaintBoundary] == trueのRenderObjectの下位Layerを再構築する
+         */
+        fun repaintCompositedChild(child: RenderObject) {
+            var childLayer = child.layer as OffsetLayer?
+            if (childLayer == null) {
+                childLayer = OffsetLayer()
+                child.layer = childLayer
+            } else {
+                childLayer.removeAllChildren()
+            }
+            val childContext = PaintingContext(childLayer, child.size.and(Offset.zero))
+
+            // paintWithContext
+            child.needsPaint = false
+            child.paint(childContext, Offset.zero)
+            // end paintWithContext
+            childContext.stopRecordingIfNeeded()
+        }
+    }
+
     private var currentLayer: PictureLayer? = null
     private var recorder: PictureRecorder? = null
     private var _canvas: Canvas? = null
@@ -36,7 +61,7 @@ class PaintingContext(
         currentLayer = PictureLayer()
         recorder = PictureRecorder()
         _canvas = recorder!!.beginRecording(estimatedBounds)
-        containerLayer.children.add(currentLayer!!)
+        containerLayer.append(currentLayer!!)
     }
 
 
@@ -49,6 +74,40 @@ class PaintingContext(
         _canvas = null
     }
 
+    /**
+     * 渡されたRenderObjectのpaint()を呼ぶ
+     *
+     * [RenderObject.isRepaintBoundary] == trueの場合、別で処理するため[compositeChild]を呼ぶ
+     */
+    fun paintChild(child: RenderObject, offset: Offset) {
+        if (child.isRepaintBoundary) {
+            stopRecordingIfNeeded()
+            compositeChild(child, offset)
+        } else {
+            child.needsPaint = false
+            child.paint(this, offset)
+        }
+    }
+
+    /**
+     * [RenderObject.isRepaintBoundary] == trueのものをpaintする
+     *
+     * [RenderObject.needsPaint]が立っていない場合は前のものを再利用する
+     */
+    fun compositeChild(child: RenderObject, offset: Offset) {
+        if (child.needsPaint) {
+            repaintCompositedChild(child)
+        }
+        val childOffsetLayer = child.layer as OffsetLayer
+        childOffsetLayer.offset = offset
+        appendLayer(childOffsetLayer)
+    }
+
+    fun appendLayer(layer: Layer) {
+        layer.remove()
+        containerLayer.append(layer)
+    }
+
 
     fun pushLayer(
         childLayer: ContainerLayer,
@@ -57,12 +116,12 @@ class PaintingContext(
         childPaintBounds: Rect? = null,
     ) {
         if (childLayer.children.isNotEmpty()) {
-            childLayer.children.clear()
+            childLayer.removeAllChildren()
         }
 
         // 新しいレイヤーを作るときは現在のPictureLayerを終了する
         stopRecordingIfNeeded()
-        containerLayer.children.add(childLayer)
+        containerLayer.append(childLayer)
 
         // 新しいPaintingContextで再帰的に動作させる
         val childContext = PaintingContext(childLayer, childPaintBounds ?: estimatedBounds)

@@ -32,15 +32,31 @@ class LayerTree {
 
 abstract class Layer {
     var paintBounds: Rect = Rect.makeWH(0f, 0f)
+    var parent: ContainerLayer? = null
 
     abstract fun paint(context: PaintContext)
     abstract fun preroll(context: PrerollContext, matrix: Matrix33)
 
     abstract fun clone(): Layer
+
+    fun remove() {
+        parent?.removeChild(this)
+    }
+
+    // AbstractNode
+    fun dropChild(child: Layer) {
+        child.parent = null
+    }
+
+    fun adoptChild(child: Layer) {
+        child.parent = this as ContainerLayer
+    }
 }
 
 open class ContainerLayer : Layer() {
-    val children: MutableList<Layer> = mutableListOf()
+    protected val childrenInternal: MutableList<Layer> = mutableListOf()
+    val children: List<Layer>
+        get() = childrenInternal
 
     override fun preroll(context: PrerollContext, matrix: Matrix33) {
         paintBounds = prerollChildren(context, matrix)
@@ -67,13 +83,30 @@ open class ContainerLayer : Layer() {
     override fun clone(): Layer {
         val cloned = ContainerLayer()
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
+
+    fun append(child: Layer) {
+        adoptChild(child)
+        childrenInternal.add(child)
+    }
+
+    fun removeChild(child: Layer) {
+        childrenInternal.remove(child)
+        child.parent = null
+    }
+
+    fun removeAllChildren() {
+        for (layer in childrenInternal) {
+            dropChild(layer)
+        }
+        childrenInternal.clear()
+    }
 }
 
-class PictureLayer() : Layer() {
+class PictureLayer : Layer() {
     var picture: Picture? = null
 
     override fun preroll(context: PrerollContext, matrix: Matrix33) {
@@ -97,7 +130,7 @@ open class OffsetLayer(
     override fun clone(): Layer {
         val cloned = OffsetLayer(offset)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
@@ -127,7 +160,7 @@ class TransformLayer(
     override fun clone(): Layer {
         val cloned = TransformLayer(transform, offset)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
@@ -166,7 +199,7 @@ class OpacityLayer(
     override fun clone(): Layer {
         val cloned = OpacityLayer(alpha, offset)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
@@ -200,7 +233,7 @@ class ClipPathLayer(
     override fun clone(): Layer {
         val cloned = ClipPathLayer(clipPath, clipBehavior)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
@@ -233,7 +266,7 @@ class ClipRectLayer(
     override fun clone(): Layer {
         val cloned = ClipRectLayer(clipRect, clipBehavior)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }
@@ -266,7 +299,7 @@ class ClipRRectLayer(
     override fun clone(): Layer {
         val cloned = ClipRRectLayer(clipRRect, clipBehavior)
         for (child in children) {
-            cloned.children.add(child.clone())
+            cloned.append(child.clone())
         }
         return cloned
     }

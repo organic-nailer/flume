@@ -3,8 +3,8 @@ package framework.render
 import common.Offset
 import common.Size
 import framework.PaintingContext
+import framework.RenderPipeline
 import framework.geometrics.Alignment
-import framework.geometrics.BoxConstraints
 import framework.render.mixin.RenderObjectWithChild
 
 class RenderPositionedBox(
@@ -12,9 +12,9 @@ class RenderPositionedBox(
     val heightFactor: Double? = null,
     val alignment: Alignment = Alignment.center,
 ) : RenderBox(), RenderObjectWithChild<RenderBox> {
-    override var child: RenderBox? = null
+    override var child: RenderBox? by RenderObjectWithChild.ChildDelegate()
 
-    override fun layout(constraints: BoxConstraints) {
+    override fun performLayout() {
         val shrinkWrapWidth =
             widthFactor != null || constraints.maxWidth == Double.POSITIVE_INFINITY
         val shrinkWrapHeight =
@@ -45,7 +45,12 @@ class RenderPositionedBox(
     override fun paint(context: PaintingContext, offset: Offset) {
         if (child != null) {
             val childParentData = child!!.parentData as BoxParentData
-            child!!.paint(context, childParentData.offset + offset)
+            context.paintChild(child!!, childParentData.offset + offset)
         }
+    }
+
+    override fun attach(owner: RenderPipeline) {
+        super.attach(owner)
+        attachChild(owner)
     }
 }

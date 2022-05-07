@@ -3,7 +3,7 @@ package framework.render
 import common.Offset
 import common.Size
 import framework.PaintingContext
-import framework.geometrics.BoxConstraints
+import framework.RenderPipeline
 import framework.render.mixin.ContainerRenderObject
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.FontMgr
@@ -15,15 +15,14 @@ import org.jetbrains.skia.paragraph.TextStyle
 import kotlin.math.ceil
 
 class RenderParagraph(
-    text: TextSpan
+    text: TextSpan,
 ) : RenderBox(), ContainerRenderObject<RenderBox> {
     private val textPainter = TextPainter(text)
+    override val thisRef: RenderObject = this
     override val children: MutableList<RenderBox> = mutableListOf()
 
-    override fun layout(constraints: BoxConstraints) {
-        textPainter.layout(
-            minWidth = constraints.minWidth, maxWidth = constraints.maxWidth
-        )
+    override fun performLayout() {
+        textPainter.layout(minWidth = constraints.minWidth, maxWidth = constraints.maxWidth)
 
         val textSize = textPainter.size
         size = constraints.constrain(textSize)
@@ -32,11 +31,16 @@ class RenderParagraph(
     override fun paint(context: PaintingContext, offset: Offset) {
         textPainter.paint(context.canvas, offset)
     }
+
+    override fun attach(owner: RenderPipeline) {
+        super.attach(owner)
+        attachChildren(owner)
+    }
 }
 
 class TextSpan(
     val text: String,
-    val textStyle: TextStyle? = null
+    val textStyle: TextStyle? = null,
 ) {
     fun build(builder: ParagraphBuilder) {
         builder.addText(text)
@@ -44,11 +48,11 @@ class TextSpan(
 }
 
 class TextPainter(
-    text: TextSpan
+    text: TextSpan,
 ) {
     var text: TextSpan = text
         set(value) {
-            if(field.text == value.text) return
+            if (field.text == value.text) return
             field = value
             markNeedsLayout()
         }
@@ -73,8 +77,7 @@ class TextPainter(
     }
 
     private fun createParagraph() {
-        val builder = ParagraphBuilder(
-            createParagraphStyle(),
+        val builder = ParagraphBuilder(createParagraphStyle(),
             FontCollection().apply { setDefaultFontManager(FontMgr.default) })
         text.build(builder)
         paragraph = builder.build()
@@ -82,10 +85,10 @@ class TextPainter(
 
     private fun layoutParagraph(minWidth: Double, maxWidth: Double) {
         paragraph!!.layout(maxWidth.toFloat())
-        if(minWidth != maxWidth) {
+        if (minWidth != maxWidth) {
             var newWidth = ceil(paragraph!!.maxIntrinsicWidth)
             newWidth = newWidth.coerceIn(minWidth.toFloat(), maxWidth.toFloat())
-            if(newWidth != ceil(paragraph!!.maxWidth)) {
+            if (newWidth != ceil(paragraph!!.maxWidth)) {
                 paragraph!!.layout(newWidth)
             }
         }
@@ -94,7 +97,7 @@ class TextPainter(
     fun layout(minWidth: Double = 0.0, maxWidth: Double = Double.POSITIVE_INFINITY) {
         lastMinWidth = minWidth
         lastMaxWidth = maxWidth
-        if(paragraph == null) {
+        if (paragraph == null) {
             createParagraph()
         }
         layoutParagraph(minWidth, maxWidth)

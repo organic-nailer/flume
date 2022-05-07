@@ -3,6 +3,7 @@ package framework.render
 import common.Offset
 import common.Size
 import framework.PaintingContext
+import framework.RenderPipeline
 import framework.geometrics.Axis
 import framework.geometrics.BoxConstraints
 import framework.geometrics.CrossAxisAlignment
@@ -20,6 +21,7 @@ class RenderFlex(
     val verticalDirection: VerticalDirection = VerticalDirection.Down,
 ) : RenderBox(), ContainerRenderObject<RenderBox> {
     override val children: MutableList<RenderBox> = mutableListOf()
+    override val thisRef: RenderObject = this
 
     private fun getMainSize(size: Size): Double {
         return when (direction) {
@@ -47,7 +49,7 @@ class RenderFlex(
         }
     }
 
-    override fun layout(constraints: BoxConstraints) {
+    override fun performLayout() {
         val maxMainSize =
             if (direction == Axis.Horizontal) constraints.maxWidth else constraints.maxHeight
         val canFlex = maxMainSize < Double.POSITIVE_INFINITY
@@ -165,7 +167,12 @@ class RenderFlex(
     override fun paint(context: PaintingContext, offset: Offset) {
         for (child in children) {
             val childParentData = child.parentData as BoxParentData
-            child.paint(context, childParentData.offset + offset)
+            context.paintChild(child, childParentData.offset + offset)
         }
+    }
+
+    override fun attach(owner: RenderPipeline) {
+        super.attach(owner)
+        attachChildren(owner)
     }
 }

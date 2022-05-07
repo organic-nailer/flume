@@ -1,5 +1,6 @@
 package framework
 
+import common.ContainerLayer
 import common.KeyEvent
 import framework.element.Element
 import framework.render.RenderView
@@ -24,14 +25,25 @@ object WidgetsFlumeBinding : WidgetsBinding {
         if (initialized) return
         initialized = true
         val configuration = engine.viewConfiguration
-        pipeline = RenderPipeline().apply {
-            renderView = RenderView(configuration.size.width, configuration.size.height)
+        pipeline = RenderPipeline(onNeedVisualUpdate = {
+            ensureVisualUpdate()
+        }).apply {
+            renderView = RenderView(configuration)
+            renderView!!.prepareInitialFrame()
         }
     }
 
+    fun ensureVisualUpdate() {
+        engine.scheduleFrame()
+    }
+
     fun attachRootWidget(rootWidget: Widget) {
+        val isBootstrapFrame = renderViewElement == null
         renderViewElement =
             RenderObjectToWidgetAdapter(rootWidget, pipeline.renderView!!).attachToRenderTree()
+        if (isBootstrapFrame) {
+            ensureVisualUpdate()
+        }
     }
 
     override fun beginFrame() {
@@ -43,7 +55,7 @@ object WidgetsFlumeBinding : WidgetsBinding {
     fun drawFrame() {
         pipeline.flushLayout()
         pipeline.flushPaint()
-        engine.render(pipeline.renderView!!.layer)
+        engine.render(pipeline.renderView!!.layer as ContainerLayer)
     }
 
 
@@ -51,6 +63,7 @@ object WidgetsFlumeBinding : WidgetsBinding {
     fun setOnKeyEventCallback(listener: (KeyEvent) -> Unit) {
         keyEventListener = listener
     }
+
     override fun handleKeyEvent(event: KeyEvent) {
         keyEventListener?.invoke(event)
     }
