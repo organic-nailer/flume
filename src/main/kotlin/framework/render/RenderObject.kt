@@ -46,7 +46,7 @@ abstract class RenderObject {
         needsPaint = true
         if (isRepaintBoundary) {
             owner?.let {
-                it.nodeNeedingPaint.add(this)
+                it.nodesNeedingPaint.add(this)
                 it.requestVisualUpdate()
             }
         } else if (parent is RenderObject) {

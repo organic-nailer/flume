@@ -36,6 +36,6 @@ class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjec
 
     private fun scheduleInitialPaint(rootLayer: ContainerLayer) {
         layer = rootLayer
-        owner!!.nodeNeedingPaint.add(this)
+        owner!!.nodesNeedingPaint.add(this)
     }
 }

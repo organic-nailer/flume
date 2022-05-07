@@ -34,7 +34,7 @@ fun appMain() {
             "a" -> runApp(createWidgetTree(LightPhase.All))
         }
         WidgetsFlumeBinding.pipeline.renderView!!.needsPaint = true
-        WidgetsFlumeBinding.pipeline.nodeNeedingPaint.add(WidgetsFlumeBinding.pipeline.renderView!!)
+        WidgetsFlumeBinding.pipeline.nodesNeedingPaint.add(WidgetsFlumeBinding.pipeline.renderView!!)
         WidgetsFlumeBinding.ensureVisualUpdate()
     }
 }
