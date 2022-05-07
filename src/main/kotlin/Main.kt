@@ -1,9 +1,6 @@
 import common.Offset
 import common.Size
-import engine.GLView
-import engine.Shell
-import engine.TaskRunner
-import engine.TaskRunners
+import engine.runFlume
 import framework.geometrics.Axis
 import framework.geometrics.MainAxisSize
 import framework.painting.BorderRadius
@@ -21,37 +18,13 @@ import framework.widget.paint.ClipPath
 import framework.widget.paint.ClipRRect
 import org.jetbrains.skia.Path
 import org.jetbrains.skia.paragraph.TextStyle
-import org.lwjgl.glfw.GLFW.GLFW_KEY_M
-import org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 fun main() {
-    val width = 640
-    val height = 480
+    runFlume(appMain = { appMain() })
+}
 
-    val taskRunners = TaskRunners(rasterTaskRunner = TaskRunner(), uiTaskRunner = TaskRunner())
-
-    val glView = GLView(width, height)
-
-    val shell = Shell(taskRunners, glView, null, width, height)
-
-    shell.initRasterThread()
-
-    var keyPressed = false
-
-    glView.setKeyCallback { _, key, _, action, _ ->
-        if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-            keyPressed = true
-        }
-    }
-
-    while (!shell.glView.windowShouldClose()) {
-        if (keyPressed) {
-            keyPressed = false
-            runApp(shell, createWidgetTree())
-        }
-        shell.glView.pollEvents()
-    }
-    shell.taskRunners.terminateAll()
+fun appMain() {
+    runApp(createWidgetTree())
 }
 
 fun createWidgetTree(): Widget {

@@ -31,8 +31,6 @@ class Rasterizer(
     }
 
     fun drawToSurface(layerTree: LayerTree) {
-        println("draw")
-
         layerTree.preroll()
 
         surface.canvas.clear(0xFFFFFFFF.toInt())

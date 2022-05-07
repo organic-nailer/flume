@@ -5,6 +5,8 @@ import common.LayerTree
 import common.Size
 import framework.Engine
 import framework.ViewConfiguration
+import framework.WidgetsBinding
+import framework.WidgetsFlumeBinding
 
 class Shell(
     val taskRunners: TaskRunners,
@@ -12,6 +14,12 @@ class Shell(
     var rasterizer: Rasterizer?,
     val width: Int, val height: Int,
 ) : Engine {
+    private var binding: WidgetsBinding = WidgetsFlumeBinding
+
+    init {
+        binding.connectToEngine(this)
+    }
+
     fun initRasterThread() {
         taskRunners.rasterTaskRunner.postTask {
             println("in rasterThread")
@@ -25,11 +33,23 @@ class Shell(
 
     override fun render(rootLayer: Layer) {
         val layerTree = LayerTree().apply {
-            this.rootLayer = rootLayer
+            this.rootLayer = rootLayer.clone()
         }
         taskRunners.rasterTaskRunner.postTask {
             rasterizer!!.drawToSurface(layerTree)
             glView.swapBuffers()
+        }
+    }
+
+    fun run(appMain: () -> Unit) {
+        taskRunners.uiTaskRunner.postTask {
+            appMain()
+        }
+    }
+
+    fun onVsync() {
+        taskRunners.uiTaskRunner.postTask {
+            binding.beginFrame()
         }
     }
 }
