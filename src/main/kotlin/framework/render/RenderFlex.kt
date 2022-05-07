@@ -68,7 +68,7 @@ class RenderFlex(
                         Axis.Vertical -> BoxConstraints(maxWidth = constraints.maxWidth)
                     }
                 }
-            child.layout(innerConstraints)
+            child.layout(innerConstraints, parentUsesSize = true)
             val childSize = child.size
             allocatedSize += getMainSize(childSize)
             crossSize = max(crossSize, getCrossSize(childSize))
@@ -174,5 +174,13 @@ class RenderFlex(
     override fun attach(owner: RenderPipeline) {
         super.attach(owner)
         attachChildren(owner)
+    }
+
+    override fun visitChildren(visitor: RenderObjectVisitor) {
+        super<ContainerRenderObject>.visitChildren(visitor)
+    }
+
+    override fun redepthChildren() {
+        super<ContainerRenderObject>.redepthChildren { redepthChild(it) }
     }
 }

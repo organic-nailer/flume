@@ -36,6 +36,14 @@ class RenderParagraph(
         super.attach(owner)
         attachChildren(owner)
     }
+
+    override fun visitChildren(visitor: RenderObjectVisitor) {
+        super<ContainerRenderObject>.visitChildren(visitor)
+    }
+
+    override fun redepthChildren() {
+        super<ContainerRenderObject>.redepthChildren { redepthChild(it) }
+    }
 }
 
 class TextSpan(

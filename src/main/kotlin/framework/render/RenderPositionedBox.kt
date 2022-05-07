@@ -21,7 +21,7 @@ class RenderPositionedBox(
             heightFactor != null || constraints.maxHeight == Double.POSITIVE_INFINITY
 
         if (child != null) {
-            child!!.layout(constraints.loosen())
+            child!!.layout(constraints.loosen(), parentUsesSize = true)
             size = constraints.constrain(Size(
                 if (shrinkWrapWidth) child!!.size.width * (widthFactor
                     ?: 0.0) else Double.POSITIVE_INFINITY,
@@ -52,5 +52,13 @@ class RenderPositionedBox(
     override fun attach(owner: RenderPipeline) {
         super.attach(owner)
         attachChild(owner)
+    }
+
+    override fun visitChildren(visitor: RenderObjectVisitor) {
+        super<RenderObjectWithChild>.visitChildren(visitor)
+    }
+
+    override fun redepthChildren() {
+        super<RenderObjectWithChild>.redepthChildren { redepthChild(it) }
     }
 }

@@ -30,8 +30,22 @@ class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjec
         attachChild(owner)
     }
 
+    override fun visitChildren(visitor: RenderObjectVisitor) {
+        super<RenderObjectWithChild>.visitChildren(visitor)
+    }
+
+    override fun redepthChildren() {
+        super<RenderObjectWithChild>.redepthChildren { redepthChild(it) }
+    }
+
     fun prepareInitialFrame() {
+        scheduleInitialLayout()
         scheduleInitialPaint(TransformLayer(offset = Offset.zero))
+    }
+
+    private fun scheduleInitialLayout() {
+        relayoutBoundary = this
+        owner!!.nodesNeedingLayout.add(this)
     }
 
     private fun scheduleInitialPaint(rootLayer: ContainerLayer) {

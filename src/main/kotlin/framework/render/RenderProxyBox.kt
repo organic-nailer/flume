@@ -9,7 +9,7 @@ abstract class RenderProxyBox : RenderBox(), RenderObjectWithChild<RenderBox> {
     override var child: RenderBox? by RenderObjectWithChild.ChildDelegate()
     override fun performLayout() {
         if (child != null) {
-            child!!.layout(constraints)
+            child!!.layout(constraints, parentUsesSize = true)
             size = child!!.size
         } else {
             size = constraints.smallest
@@ -25,5 +25,13 @@ abstract class RenderProxyBox : RenderBox(), RenderObjectWithChild<RenderBox> {
     override fun attach(owner: RenderPipeline) {
         super.attach(owner)
         attachChild(owner)
+    }
+
+    override fun visitChildren(visitor: RenderObjectVisitor) {
+        super<RenderObjectWithChild>.visitChildren(visitor)
+    }
+
+    override fun redepthChildren() {
+        super<RenderObjectWithChild>.redepthChildren { redepthChild(it) }
     }
 }
