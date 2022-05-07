@@ -6,13 +6,12 @@ import framework.geometrics.BoxConstraints
 
 class RenderConstrainedBox(
     private val additionalConstraints: BoxConstraints,
-    val child: RenderBox?,
-) : RenderBox() {
+) : RenderProxyBox() {
 
     override fun layout(constraints: BoxConstraints) {
         if (child != null) {
-            child.layout(additionalConstraints.enforce(constraints))
-            size = child.size
+            child!!.layout(additionalConstraints.enforce(constraints))
+            size = child!!.size
         } else {
             size = additionalConstraints.enforce(constraints).constrain(size)
         }

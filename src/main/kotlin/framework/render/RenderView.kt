@@ -6,10 +6,11 @@ import common.Size
 import common.TransformLayer
 import framework.PaintingContext
 import framework.geometrics.BoxConstraints
+import framework.render.mixin.RenderObjectWithChild
 
-class RenderView(width: Double, height: Double) : RenderObject() {
+class RenderView(width: Double, height: Double) : RenderObject(), RenderObjectWithChild<RenderBox> {
     override var size: Size = Size(width, height)
-    var child: RenderBox? = null
+    override var child: RenderBox? = null
     val layer: ContainerLayer = TransformLayer()
     override fun layout(constraints: BoxConstraints) {
         throw NotImplementedError()

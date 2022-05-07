@@ -4,15 +4,13 @@ import common.Clip
 import common.Offset
 import framework.PaintingContext
 import framework.painting.BorderRadius
-import framework.render.RenderBox
 import org.jetbrains.skia.RRect
 
 class RenderClipRRect(
     val borderRadius: BorderRadius,
     clipper: CustomClipper<RRect>? = null,
     clipBehavior: Clip = Clip.AntiAlias,
-    child: RenderBox? = null,
-) : RenderCustomClip<RRect>(clipper, clipBehavior, child) {
+) : RenderCustomClip<RRect>(clipper, clipBehavior) {
 
     override val defaultClip: RRect
         get() = borderRadius.toRRect(size.and(Offset.zero))

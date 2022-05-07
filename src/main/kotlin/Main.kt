@@ -17,6 +17,11 @@ import framework.render.clip.CustomClipper
 import framework.render.clip.RenderClipOval
 import framework.render.clip.RenderClipPath
 import framework.render.clip.RenderClipRRect
+import framework.widget.Align
+import framework.widget.ColoredBox
+import framework.widget.RenderObjectToWidgetAdapter
+import framework.widget.SizedBox
+import framework.widget.Widget
 import org.jetbrains.skia.Path
 import org.lwjgl.glfw.GLFW.GLFW_KEY_M
 import org.lwjgl.glfw.GLFW.GLFW_PRESS
@@ -50,33 +55,10 @@ fun main() {
     while (!shell.glView.windowShouldClose()) {
         if (keyPressed) {
             keyPressed = false
-            renderPipeline.renderView!!.child = RenderPositionedBox(
-                child = RenderFlex(
-                    mainAxisSize = MainAxisSize.Min,
-                    children = listOf(
-                        RenderClipPath(
-                            clipper = ArcClipper(),
-                            child = RenderConstrainedBox(
-                                additionalConstraints = BoxConstraints.tight(Size(100.0, 100.0)),
-                                child = RenderColoredBox(0xFFF44336.toInt())
-                            )
-                        ),
-                        RenderClipRRect(
-                            borderRadius = BorderRadius.circular(20.0),
-                            child = RenderConstrainedBox(
-                                additionalConstraints = BoxConstraints.tight(Size(100.0, 100.0)),
-                                child = RenderColoredBox(0xFFFFEB3B.toInt())
-                            )
-                        ),
-                        RenderClipOval(
-                            child = RenderConstrainedBox(
-                                additionalConstraints = BoxConstraints.tight(Size(100.0, 100.0)),
-                                child = RenderColoredBox(0xFF4CAF50.toInt())
-                            )
-                        )
-                    )
-                )
-            )
+            RenderObjectToWidgetAdapter(
+                createWidgetTree(),
+                renderPipeline.renderView!!
+            ).attachToRenderTree()
             shell.drawFrame()
         }
         shell.glView.pollEvents()
@@ -84,27 +66,13 @@ fun main() {
     shell.taskRunners.terminateAll()
 }
 
-class ArcClipper: CustomClipper<Path>() {
-    override fun getClip(size: Size): Path {
-        return Path().apply {
-            lineTo(0f, size.height.toFloat() - 30f)
-
-            val firstControlPoint = Offset(size.width / 4, size.height)
-            val firstPoint = Offset(size.width / 2, size.height)
-            quadTo(firstControlPoint.dx.toFloat(),
-                firstControlPoint.dy.toFloat(),
-                firstPoint.dx.toFloat(),
-                firstPoint.dy.toFloat())
-
-            val secondControlPoint = Offset(size.width - size.width / 4, size.height)
-            val secondPoint = Offset(size.width, size.height - 30)
-            quadTo(secondControlPoint.dx.toFloat(),
-                secondControlPoint.dy.toFloat(),
-                secondPoint.dx.toFloat(),
-                secondPoint.dy.toFloat())
-            lineTo(size.width.toFloat(), 0f)
-            closePath()
-        }
-    }
-    override fun shouldReclip(oldClipper: CustomClipper<Path>): Boolean = false
+fun createWidgetTree(): Widget {
+    return Align(
+        child = SizedBox(
+            width = 100.0, height = 100.0,
+            child = ColoredBox(
+                color = 0xFFFF0000.toInt()
+            )
+        )
+    )
 }

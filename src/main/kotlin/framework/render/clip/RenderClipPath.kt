@@ -3,13 +3,11 @@ package framework.render.clip
 import common.Clip
 import common.Offset
 import framework.PaintingContext
-import framework.render.RenderBox
 import org.jetbrains.skia.Path
 
 class RenderClipPath(
     clipper: CustomClipper<Path>? = null, clipBehavior: Clip = Clip.AntiAlias,
-    child: RenderBox? = null,
-) : RenderCustomClip<Path>(clipper, clipBehavior, child) {
+) : RenderCustomClip<Path>(clipper, clipBehavior) {
 
     override val defaultClip: Path
         get() = Path().apply {

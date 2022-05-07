@@ -3,14 +3,12 @@ package framework.render.clip
 import common.Clip
 import common.Offset
 import framework.PaintingContext
-import framework.render.RenderBox
 import org.jetbrains.skia.Path
 import org.jetbrains.skia.Rect
 
 class RenderClipOval(
     clipper: CustomClipper<Rect>? = null, clipBehavior: Clip = Clip.AntiAlias,
-    child: RenderBox? = null,
-) : RenderCustomClip<Rect>(clipper, clipBehavior, child) {
+) : RenderCustomClip<Rect>(clipper, clipBehavior) {
     override val defaultClip: Rect
         get() = size.and(Offset.zero)
 
