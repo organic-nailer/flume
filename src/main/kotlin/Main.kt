@@ -1,7 +1,9 @@
+import common.KeyEvent
 import common.Offset
 import common.Size
 import engine.runFlume
 import framework.WidgetsFlumeBinding
+import framework.element.BuildContext
 import framework.geometrics.Axis
 import framework.geometrics.MainAxisSize
 import framework.painting.BorderRadius
@@ -13,6 +15,9 @@ import framework.widget.ColoredBox
 import framework.widget.Flex
 import framework.widget.RichText
 import framework.widget.SizedBox
+import framework.widget.State
+import framework.widget.StatefulWidget
+import framework.widget.StatelessWidget
 import framework.widget.Widget
 import framework.widget.paint.ClipOval
 import framework.widget.paint.ClipPath
@@ -25,69 +30,102 @@ fun main() {
 }
 
 fun appMain() {
-    runApp(createWidgetTree())
+    val propagator = Propagator<KeyEvent>()
+    runApp(MyPage(propagator))
     WidgetsFlumeBinding.setOnKeyEventCallback {
-        when(it.character) {
-            "r" -> runApp(createWidgetTree(LightPhase.Red))
-            "y" -> runApp(createWidgetTree(LightPhase.Yellow))
-            "g" -> runApp(createWidgetTree(LightPhase.Green))
-            "a" -> runApp(createWidgetTree(LightPhase.All))
+        propagator.fire(it)
+    }
+}
+
+class Propagator<T> {
+    var listener: ((T) -> Unit)? = null
+
+    fun fire(data: T) {
+        listener?.invoke(data)
+    }
+}
+
+class MyPage(private val propagator: Propagator<KeyEvent>): StatelessWidget() {
+    override fun build(context: BuildContext): Widget {
+        return MyStatefulView(propagator)
+    }
+}
+
+class MyStatefulView(val propagator: Propagator<KeyEvent>): StatefulWidget() {
+    override fun createState(): State<*> = MyState()
+}
+
+class MyState: State<MyStatefulView>() {
+    private val darken = 0xFF9E9E9E.toInt()
+    private var phase: LightPhase = LightPhase.All
+
+    override fun didChangeDependencies() {
+        super.didChangeDependencies()
+        widget.propagator.listener = {
+            setState {
+                phase = when(it.character) {
+                    "r" -> LightPhase.Red
+                    "y" -> LightPhase.Yellow
+                    "g" -> LightPhase.Green
+                    "a" -> LightPhase.All
+                    else -> phase
+                }
+            }
         }
+    }
+
+    override fun build(context: BuildContext): Widget {
+        return Align(
+            child = Flex(
+                mainAxisSize = MainAxisSize.Min,
+                direction = Axis.Vertical,
+                children = listOf(
+                    ClipPath(
+                        clipper = ArcClipper(),
+                        child = SizedBox(
+                            width = 100.0, height = 100.0,
+                            child = ColoredBox(
+                                color = if(phase in listOf(LightPhase.Red, LightPhase.All)) 0xFFF44336.toInt()
+                                else darken
+                            )
+                        )
+                    ),
+                    ClipRRect(
+                        borderRadius = BorderRadius.circular(20.0),
+                        child = SizedBox(
+                            width = 100.0, height = 100.0,
+                            child = ColoredBox(
+                                color = if(phase in listOf(LightPhase.Yellow, LightPhase.All)) 0xFFFFEB3B.toInt()
+                                else darken
+                            )
+                        )
+                    ),
+                    ClipOval(
+                        child = SizedBox(
+                            width = 100.0, height = 100.0,
+                            child = ColoredBox(
+                                color = if(phase in listOf(LightPhase.Green, LightPhase.All)) 0xFF4CAF50.toInt()
+                                else darken
+                            )
+                        )
+                    ),
+                    RichText(
+                        TextSpan(
+                            "信号機だよ",
+                            textStyle = TextStyle().apply {
+                                color = 0xFFFF0000.toInt()
+                                fontSize = 50f
+                            }
+                        )
+                    )
+                )
+            )
+        )
     }
 }
 
 enum class LightPhase {
     Red, Green, Yellow, All
-}
-
-fun createWidgetTree(phase: LightPhase = LightPhase.All): Widget {
-    val darken = 0xFF9E9E9E.toInt()
-    return Align(
-        child = Flex(
-            mainAxisSize = MainAxisSize.Min,
-            direction = Axis.Vertical,
-            children = listOf(
-                ClipPath(
-                    clipper = ArcClipper(),
-                    child = SizedBox(
-                        width = 100.0, height = 100.0,
-                        child = ColoredBox(
-                            color = if(phase in listOf(LightPhase.Red, LightPhase.All)) 0xFFF44336.toInt()
-                                    else darken
-                        )
-                    )
-                ),
-                ClipRRect(
-                    borderRadius = BorderRadius.circular(20.0),
-                    child = SizedBox(
-                        width = 100.0, height = 100.0,
-                        child = ColoredBox(
-                            color = if(phase in listOf(LightPhase.Yellow, LightPhase.All)) 0xFFFFEB3B.toInt()
-                            else darken
-                        )
-                    )
-                ),
-                ClipOval(
-                    child = SizedBox(
-                        width = 100.0, height = 100.0,
-                        child = ColoredBox(
-                            color = if(phase in listOf(LightPhase.Green, LightPhase.All)) 0xFF4CAF50.toInt()
-                            else darken
-                        )
-                    )
-                ),
-                RichText(
-                    TextSpan(
-                        "信号機だよ",
-                        textStyle = TextStyle().apply {
-                            color = 0xFFFF0000.toInt()
-                            fontSize = 50f
-                        }
-                    )
-                )
-            )
-        )
-    )
 }
 
 class ArcClipper: CustomClipper<Path>() {

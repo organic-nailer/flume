@@ -4,13 +4,16 @@ import framework.render.RenderObject
 import framework.widget.Widget
 
 abstract class Element(
-    open var widget: Widget?,
-) : Comparable<Element> {
+    widget: Widget,
+) : Comparable<Element>, BuildContext {
     var parent: Element? = null
     var depth: Int = 0
-    var owner: BuildOwner? = null
+    override var owner: BuildOwner? = null
     var dirty: Boolean = true
     var inDirtyList: Boolean = false
+
+    final override var widget: Widget = widget
+        private set
 
     /**
      * 自分と子を探索して一番近い[RenderObjectElement]の持つ[RenderObject]を返す
@@ -65,7 +68,7 @@ abstract class Element(
             // 省略する
             if (child.widget == newWidget) {
                 newChild = child
-            } else if (Widget.canUpdate(child.widget!!, newWidget)) {
+            } else if (Widget.canUpdate(child.widget, newWidget)) {
                 child.update(newWidget)
                 newChild = child
             } else {
