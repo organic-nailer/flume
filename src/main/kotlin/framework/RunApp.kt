@@ -1,5 +1,6 @@
 package framework
 
+import common.KeyEvent
 import common.Layer
 import framework.widget.Widget
 
@@ -21,4 +22,6 @@ interface WidgetsBinding {
     fun connectToEngine(engine: Engine)
 
     fun beginFrame()
+
+    fun handleKeyEvent(event: KeyEvent)
 }

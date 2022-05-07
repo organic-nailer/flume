@@ -1,11 +1,13 @@
 package engine
 
+import common.KeyEvent
 import org.jetbrains.skia.DirectContext
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
 
-class GLView(width: Int, height: Int) {
+class GLView(width: Int, height: Int, private val delegate: GLViewDelegate) {
     private var windowHandle: Long = -1
+    private val keyboardController: KeyboardController
 
     init {
         GLFW.glfwInit()
@@ -14,6 +16,17 @@ class GLView(width: Int, height: Int) {
         windowHandle = GLFW.glfwCreateWindow(width, height, "Flume", 0, 0)
         GLFW.glfwSwapInterval(1)
         GLFW.glfwShowWindow(windowHandle)
+        keyboardController = KeyboardController(windowHandle) {
+            if (!checkWindowClose(it)) delegate.onKeyEvent(it)
+        }
+    }
+
+    private fun checkWindowClose(event: KeyEvent): Boolean {
+        if (event.logicalKeyboardKey == GLFW.GLFW_KEY_ESCAPE && event.phase == KeyEvent.KeyEventPhase.KeyDown) {
+            GLFW.glfwSetWindowShouldClose(windowHandle, true)
+            return true
+        }
+        return false
     }
 
     fun windowShouldClose(): Boolean {
@@ -36,5 +49,9 @@ class GLView(width: Int, height: Int) {
 
     fun setKeyCallback(callback: (window: Long, key: Int, code: Int, action: Int, mods: Int) -> Unit) {
         GLFW.glfwSetKeyCallback(windowHandle, callback)
+    }
+
+    interface GLViewDelegate {
+        fun onKeyEvent(event: KeyEvent)
     }
 }

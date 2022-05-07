@@ -1,6 +1,7 @@
 import common.Offset
 import common.Size
 import engine.runFlume
+import framework.WidgetsFlumeBinding
 import framework.geometrics.Axis
 import framework.geometrics.MainAxisSize
 import framework.painting.BorderRadius
@@ -25,9 +26,22 @@ fun main() {
 
 fun appMain() {
     runApp(createWidgetTree())
+    WidgetsFlumeBinding.setOnKeyEventCallback {
+        when(it.character) {
+            "r" -> runApp(createWidgetTree(LightPhase.Red))
+            "y" -> runApp(createWidgetTree(LightPhase.Yellow))
+            "g" -> runApp(createWidgetTree(LightPhase.Green))
+            "a" -> runApp(createWidgetTree(LightPhase.All))
+        }
+    }
 }
 
-fun createWidgetTree(): Widget {
+enum class LightPhase {
+    Red, Green, Yellow, All
+}
+
+fun createWidgetTree(phase: LightPhase = LightPhase.All): Widget {
+    val darken = 0xFF9E9E9E.toInt()
     return Align(
         child = Flex(
             mainAxisSize = MainAxisSize.Min,
@@ -37,20 +51,29 @@ fun createWidgetTree(): Widget {
                     clipper = ArcClipper(),
                     child = SizedBox(
                         width = 100.0, height = 100.0,
-                        child = ColoredBox(color = 0xFFF44336.toInt())
+                        child = ColoredBox(
+                            color = if(phase in listOf(LightPhase.Red, LightPhase.All)) 0xFFF44336.toInt()
+                                    else darken
+                        )
                     )
                 ),
                 ClipRRect(
                     borderRadius = BorderRadius.circular(20.0),
                     child = SizedBox(
                         width = 100.0, height = 100.0,
-                        child = ColoredBox(color = 0xFFFFEB3B.toInt())
+                        child = ColoredBox(
+                            color = if(phase in listOf(LightPhase.Yellow, LightPhase.All)) 0xFFFFEB3B.toInt()
+                            else darken
+                        )
                     )
                 ),
                 ClipOval(
                     child = SizedBox(
                         width = 100.0, height = 100.0,
-                        child = ColoredBox(color = 0xFF4CAF50.toInt())
+                        child = ColoredBox(
+                            color = if(phase in listOf(LightPhase.Green, LightPhase.All)) 0xFF4CAF50.toInt()
+                            else darken
+                        )
                     )
                 ),
                 RichText(

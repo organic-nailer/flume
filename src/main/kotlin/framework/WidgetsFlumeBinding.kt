@@ -1,5 +1,6 @@
 package framework
 
+import common.KeyEvent
 import framework.element.Element
 import framework.render.RenderView
 import framework.widget.RenderObjectToWidgetAdapter
@@ -43,5 +44,14 @@ object WidgetsFlumeBinding : WidgetsBinding {
         pipeline.flushLayout()
         pipeline.flushPaint()
         engine.render(pipeline.renderView!!.layer)
+    }
+
+
+    var keyEventListener: ((KeyEvent) -> Unit)? = null
+    fun setOnKeyEventCallback(listener: (KeyEvent) -> Unit) {
+        keyEventListener = listener
+    }
+    override fun handleKeyEvent(event: KeyEvent) {
+        keyEventListener?.invoke(event)
     }
 }

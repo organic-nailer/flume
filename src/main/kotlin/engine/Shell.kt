@@ -1,5 +1,6 @@
 package engine
 
+import common.KeyEvent
 import common.Layer
 import common.LayerTree
 import common.Size
@@ -10,10 +11,10 @@ import framework.WidgetsFlumeBinding
 
 class Shell(
     val taskRunners: TaskRunners,
-    var glView: GLView,
     var rasterizer: Rasterizer?,
     val width: Int, val height: Int,
-) : Engine {
+) : Engine, GLView.GLViewDelegate {
+    var glView: GLView = GLView(width, height, this)
     private var binding: WidgetsBinding = WidgetsFlumeBinding
 
     init {
@@ -39,6 +40,10 @@ class Shell(
             rasterizer!!.drawToSurface(layerTree)
             glView.swapBuffers()
         }
+    }
+
+    override fun onKeyEvent(event: KeyEvent) {
+        binding.handleKeyEvent(event)
     }
 
     fun run(appMain: () -> Unit) {

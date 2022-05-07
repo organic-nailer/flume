@@ -12,19 +12,18 @@ fun runFlume(
 
     println("task created")
 
-    val glView = GLView(windowWidth, windowHeight)
-    val shell = Shell(taskRunners, glView, null, windowWidth, windowHeight)
+    val shell = Shell(taskRunners, null, windowWidth, windowHeight)
     shell.initRasterThread()
 
     shell.run {
         appMain()
     }
 
-    while (!glView.windowShouldClose()) {
+    while (!shell.glView.windowShouldClose()) {
         Thread.sleep(30)
         shell.onVsync()
 
-        glView.pollEvents()
+        shell.glView.pollEvents()
     }
     taskRunners.terminateAll()
 }
