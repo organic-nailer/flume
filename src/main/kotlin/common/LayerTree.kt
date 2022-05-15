@@ -75,13 +75,18 @@ class PictureLayer() : Layer() {
     }
 }
 
-open class OffsetLayer(
-    open var offset: Offset = Offset.zero,
-) : ContainerLayer() {}
-
 class TransformLayer(
-    val transform: Matrix33 = Matrix33.IDENTITY, offset: Offset = Offset.zero,
-) : OffsetLayer(offset) {
+    val transform: Matrix33 = Matrix33.IDENTITY,
+) : ContainerLayer() {
+    companion object {
+        fun withOffset(
+            transform: Matrix33 = Matrix33.IDENTITY,
+            offset: Offset = Offset.zero,
+        ): TransformLayer {
+            val move = Matrix33.makeTranslate(offset.dx.toFloat(), offset.dy.toFloat())
+            return TransformLayer(transform.makeConcat(move))
+        }
+    }
 
     override fun preroll(context: PrerollContext, matrix: Matrix33) {
         val childMatrix = matrix.makeConcat(transform)
@@ -102,8 +107,8 @@ class TransformLayer(
 }
 
 class OpacityLayer(
-    var alpha: Int? = null, offset: Offset = Offset.zero,
-) : OffsetLayer(offset) {
+    var alpha: Int? = null, val offset: Offset = Offset.zero,
+) : ContainerLayer() {
     override fun preroll(context: PrerollContext, matrix: Matrix33) {
         val childMatrix = matrix.transform(offset)
 
