@@ -18,7 +18,7 @@ class LayerTree {
     fun preroll() {
         assert(rootLayer != null)
 
-        rootLayer!!.preroll(Matrix33.IDENTITY)
+        rootLayer!!.preroll()
     }
 
     /**
@@ -33,23 +33,23 @@ abstract class Layer {
     var paintBounds: Rect = Rect.makeWH(0f, 0f)
 
     abstract fun paint(context: PaintContext)
-    abstract fun preroll(matrix: Matrix33)
+    abstract fun preroll()
 }
 
 open class ContainerLayer : Layer() {
     val children: MutableList<Layer> = mutableListOf()
 
-    override fun preroll(matrix: Matrix33) {
-        paintBounds = prerollChildren(matrix)
+    override fun preroll() {
+        paintBounds = prerollChildren()
     }
 
     /**
      * 子の矩形を計算しその和を返す
      */
-    protected fun prerollChildren(childMatrix: Matrix33): Rect {
+    protected fun prerollChildren(): Rect {
         var bounds = kEmptyRect
         for (child in children) {
-            child.preroll(childMatrix)
+            child.preroll()
             bounds = bounds.join(child.paintBounds)
         }
         return bounds
@@ -62,10 +62,10 @@ open class ContainerLayer : Layer() {
     }
 }
 
-class PictureLayer() : Layer() {
+class PictureLayer : Layer() {
     var picture: Picture? = null
 
-    override fun preroll(matrix: Matrix33) {
+    override fun preroll() {
         paintBounds = picture!!.cullRect
     }
 
@@ -87,10 +87,8 @@ class TransformLayer(
         }
     }
 
-    override fun preroll(matrix: Matrix33) {
-        val childMatrix = matrix.makeConcat(transform)
-
-        val childPaintBounds = prerollChildren(childMatrix)
+    override fun preroll() {
+        val childPaintBounds = prerollChildren()
         paintBounds = transform.mapRect(childPaintBounds)
     }
 }
@@ -98,10 +96,8 @@ class TransformLayer(
 class OpacityLayer(
     var alpha: Int? = null, val offset: Offset = Offset.zero,
 ) : ContainerLayer() {
-    override fun preroll(matrix: Matrix33) {
-        val childMatrix = matrix.transform(offset)
-
-        super.preroll(matrix)
+    override fun preroll() {
+        super.preroll()
 
         paintBounds = paintBounds.makeOffset(offset)
     }
@@ -125,9 +121,9 @@ class OpacityLayer(
 class ClipPathLayer(
     var clipPath: Path, var clipBehavior: Clip = Clip.AntiAlias,
 ) : ContainerLayer() {
-    override fun preroll(matrix: Matrix33) {
+    override fun preroll() {
         val clipPathBounds = clipPath.bounds
-        val childPaintBounds = prerollChildren(matrix)
+        val childPaintBounds = prerollChildren()
         if (childPaintBounds.intersect(clipPathBounds) != null) {
             paintBounds = childPaintBounds
         }
@@ -145,8 +141,8 @@ class ClipPathLayer(
 class ClipRectLayer(
     var clipRect: Rect, var clipBehavior: Clip = Clip.AntiAlias,
 ) : ContainerLayer() {
-    override fun preroll(matrix: Matrix33) {
-        val childPaintBounds = prerollChildren(matrix)
+    override fun preroll() {
+        val childPaintBounds = prerollChildren()
         if (childPaintBounds.intersect(clipRect) != null) {
             paintBounds = childPaintBounds
         }
@@ -164,8 +160,8 @@ class ClipRectLayer(
 class ClipRRectLayer(
     var clipRRect: RRect, var clipBehavior: Clip = Clip.AntiAlias,
 ) : ContainerLayer() {
-    override fun preroll(matrix: Matrix33) {
-        val childPaintBounds = prerollChildren(matrix)
+    override fun preroll() {
+        val childPaintBounds = prerollChildren()
         if (childPaintBounds.intersect(clipRRect) != null) {
             paintBounds = childPaintBounds
         }
