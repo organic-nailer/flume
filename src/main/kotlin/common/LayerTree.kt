@@ -103,7 +103,7 @@ class TransformLayer(
 }
 
 class OpacityLayer(
-    var alpha: Int? = null, val offset: Offset = Offset.zero,
+    var alpha: Int? = null, var offset: Offset = Offset.zero,
 ) : ContainerLayer() {
     override fun preroll() {
         super.preroll()
