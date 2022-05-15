@@ -91,6 +91,15 @@ class TransformLayer(
         val childPaintBounds = prerollChildren()
         paintBounds = transform.mapRect(childPaintBounds)
     }
+
+    override fun paint(context: PaintContext) {
+        context.canvas.save()
+        context.canvas.concat(transform)
+
+        super.paint(context)
+
+        context.canvas.restore()
+    }
 }
 
 class OpacityLayer(
