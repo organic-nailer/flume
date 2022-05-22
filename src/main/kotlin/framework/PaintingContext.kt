@@ -1,18 +1,10 @@
 package framework
 
-import common.Clip
-import common.ClipPathLayer
-import common.ClipRRectLayer
-import common.ClipRectLayer
 import common.ContainerLayer
 import common.Offset
-import common.OpacityLayer
 import common.PictureLayer
-import common.makeOffset
 import org.jetbrains.skia.Canvas
-import org.jetbrains.skia.Path
 import org.jetbrains.skia.PictureRecorder
-import org.jetbrains.skia.RRect
 import org.jetbrains.skia.Rect
 
 class PaintingContext(
@@ -68,76 +60,6 @@ class PaintingContext(
         val childContext = PaintingContext(childLayer, childPaintBounds ?: estimatedBounds)
         painter(childContext, offset)
         childContext.stopRecordingIfNeeded()
-    }
-
-    fun pushOpacity(
-        offset: Offset,
-        alpha: Int,
-        painter: PaintingContextCallback,
-        oldLayer: OpacityLayer? = null,
-    ): OpacityLayer {
-        val layer = oldLayer ?: OpacityLayer()
-        layer.let {
-            it.alpha = alpha
-            it.offset = offset
-        }
-        pushLayer(layer, painter, Offset.zero)
-        return layer
-    }
-
-    fun pushClipPath(
-        offset: Offset,
-        bounds: Rect,
-        clipPath: Path,
-        painter: PaintingContextCallback,
-        clipBehavior: Clip = Clip.AntiAlias,
-        oldLayer: ClipPathLayer? = null,
-    ): ClipPathLayer {
-        val offsetBounds = bounds.offset(offset.dx.toFloat(), offset.dy.toFloat())
-        val offsetClipPath = clipPath.offset(offset.dx.toFloat(), offset.dy.toFloat())
-        val layer = oldLayer ?: ClipPathLayer(offsetClipPath)
-        layer.let {
-            it.clipPath = offsetClipPath
-            it.clipBehavior = clipBehavior
-        }
-        pushLayer(layer, painter, offset, childPaintBounds = offsetBounds)
-        return layer
-    }
-
-    fun pushClipRRect(
-        offset: Offset,
-        bounds: Rect,
-        clipRRect: RRect,
-        painter: PaintingContextCallback,
-        clipBehavior: Clip = Clip.AntiAlias,
-        oldLayer: ClipRRectLayer? = null,
-    ): ClipRRectLayer {
-        val offsetBounds = bounds.offset(offset.dx.toFloat(), offset.dy.toFloat())
-        val offsetClipRRect = clipRRect.makeOffset(offset)
-        val layer = oldLayer ?: ClipRRectLayer(offsetClipRRect)
-        layer.let {
-            it.clipRRect = offsetClipRRect
-            it.clipBehavior = clipBehavior
-        }
-        pushLayer(layer, painter, offset, childPaintBounds = offsetBounds)
-        return layer
-    }
-
-    fun pushClipRect(
-        offset: Offset,
-        clipRect: Rect,
-        painter: PaintingContextCallback,
-        clipBehavior: Clip = Clip.AntiAlias,
-        oldLayer: ClipRectLayer? = null,
-    ): ClipRectLayer {
-        val offsetClipRect = clipRect.makeOffset(offset)
-        val layer = oldLayer ?: ClipRectLayer(offsetClipRect)
-        layer.let {
-            it.clipRect = offsetClipRect
-            it.clipBehavior = clipBehavior
-        }
-        pushLayer(layer, painter, offset, childPaintBounds = offsetClipRect)
-        return layer
     }
 }
 

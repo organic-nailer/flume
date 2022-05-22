@@ -1,7 +1,6 @@
 package common
 
 import org.jetbrains.skia.Matrix33
-import org.jetbrains.skia.RRect
 import org.jetbrains.skia.Rect
 import kotlin.math.abs
 import kotlin.math.max
@@ -103,19 +102,6 @@ fun Rect.roundOut(): Rect {
 val kEmptyRect: Rect = Rect.makeWH(0f, 0f)
 
 val kGiantRect: Rect = Rect.makeLTRB(-1e9f, -1e9f, 1e9f, 1e9f)
-
-// RRect Extensions
-fun RRect.makeOffset(dx: Float, dy: Float): RRect {
-    return RRect.makeComplexLTRB(this.left + dx,
-        this.top + dy,
-        this.right + dx,
-        this.bottom + dy,
-        this.radii)
-}
-
-fun RRect.makeOffset(offset: Offset): RRect {
-    return this.makeOffset(offset.dx.toFloat(), offset.dy.toFloat())
-}
 
 // Matrix33 Extensions
 
