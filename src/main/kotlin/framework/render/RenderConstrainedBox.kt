@@ -6,8 +6,8 @@ import framework.geometrics.BoxConstraints
 
 class RenderConstrainedBox(
     private val additionalConstraints: BoxConstraints,
-    val child: RenderBox?,
-) : RenderBox() {
+    child: RenderBox?,
+) : RenderProxyBox(child) {
 
     override fun layout(constraints: BoxConstraints) {
         if (child != null) {
