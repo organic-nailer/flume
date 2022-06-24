@@ -23,7 +23,7 @@ class Alignment(val x: Double, val y: Double) {
     }
 
     fun computeOffset(parentSize: Size, childSize: Size): Offset {
-        val offsetIfCenter = (parentSize - childSize) as Offset
-        return alongOffset(offsetIfCenter)
+        val offsetIfRightBottom = (parentSize - childSize) as Offset
+        return alongOffset(offsetIfRightBottom)
     }
 }
