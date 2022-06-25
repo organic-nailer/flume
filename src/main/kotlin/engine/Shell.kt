@@ -10,10 +10,10 @@ import framework.WidgetsFlumeBinding
 
 class Shell(
     val taskRunners: TaskRunners,
-    var glView: GLView,
     var rasterizer: Rasterizer?,
     val width: Int, val height: Int,
 ) : Engine {
+    var glView: GLView = GLView(width, height)
     private var binding: WidgetsBinding = WidgetsFlumeBinding
 
     init {

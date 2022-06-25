@@ -90,10 +90,6 @@ class PictureLayer : Layer() {
     }
 }
 
-open class OffsetLayer(
-    open var offset: Offset = Offset.zero,
-) : ContainerLayer() {}
-
 class TransformLayer(
     val transform: Matrix33 = Matrix33.IDENTITY,
 ) : ContainerLayer() {
@@ -122,7 +118,7 @@ class TransformLayer(
     }
 
     override fun clone(): Layer {
-        val cloned = TransformLayer(transform, offset)
+        val cloned = TransformLayer(transform)
         for (child in children) {
             cloned.children.add(child.clone())
         }
