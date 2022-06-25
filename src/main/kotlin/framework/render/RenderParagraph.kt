@@ -53,8 +53,6 @@ class TextPainter(
             markNeedsLayout()
         }
     private var paragraph: Paragraph? = null
-    private var lastMinWidth: Double? = null
-    private var lastMaxWidth: Double? = null
     val width: Double get() = paragraph!!.maxWidth.toDouble()
     val height: Double get() = paragraph!!.height.toDouble()
     val size: Size get() = Size(width, height)
@@ -92,8 +90,6 @@ class TextPainter(
     }
 
     fun layout(minWidth: Double = 0.0, maxWidth: Double = Double.POSITIVE_INFINITY) {
-        lastMinWidth = minWidth
-        lastMaxWidth = maxWidth
         if(paragraph == null) {
             createParagraph()
         }
