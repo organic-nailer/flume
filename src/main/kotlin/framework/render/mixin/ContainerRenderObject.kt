@@ -10,4 +10,13 @@ interface ContainerRenderObject<ChildType : RenderObject> {
         children.add(child)
         child.parentData = BoxParentData()
     }
+
+    /**
+     * Implement先の[RenderObject.visitChildren]で必ず呼ぶ
+     */
+    fun visitChildren(visitor: RenderObjectVisitor) {
+        for (child in children) {
+            visitor(child)
+        }
+    }
 }
