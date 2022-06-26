@@ -7,7 +7,7 @@ fun runApp(app: Widget) {
     WidgetsFlumeBinding.apply {
         ensureInitialized()
         attachRootWidget(app)
-        drawFrame()
+        engine.scheduleFrame()
     }
 }
 
@@ -15,6 +15,8 @@ interface Engine {
     val viewConfiguration: ViewConfiguration
 
     fun render(rootLayer: Layer)
+
+    fun scheduleFrame()
 }
 
 interface WidgetsBinding {
