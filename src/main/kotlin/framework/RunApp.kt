@@ -8,6 +8,7 @@ fun runApp(app: Widget) {
     WidgetsFlumeBinding.apply {
         ensureInitialized()
         attachRootWidget(app)
+        engine.scheduleFrame()
     }
 }
 

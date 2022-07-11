@@ -129,21 +129,6 @@ class PaintingContext(
         childContext.stopRecordingIfNeeded()
     }
 
-    fun pushOpacity(
-        offset: Offset,
-        alpha: Int,
-        painter: PaintingContextCallback,
-        oldLayer: OpacityLayer? = null,
-    ): OpacityLayer {
-        val layer = oldLayer ?: OpacityLayer()
-        layer.let {
-            it.alpha = alpha
-            it.offset = offset
-        }
-        pushLayer(layer, painter, Offset.zero)
-        return layer
-    }
-
     fun pushClipPath(
         offset: Offset,
         bounds: Rect,

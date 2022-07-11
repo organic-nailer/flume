@@ -17,4 +17,13 @@ interface ContainerRenderObject<ChildType : RenderObject> {
             child.attach(owner)
         }
     }
+
+    /**
+     * Implement先の[RenderObject.visitChildren]で必ず呼ぶ
+     */
+    fun visitChildren(visitor: RenderObjectVisitor) {
+        for (child in children) {
+            visitor(child)
+        }
+    }
 }
