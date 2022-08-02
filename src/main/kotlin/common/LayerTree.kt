@@ -140,7 +140,7 @@ class OpacityLayer(
     }
 
     override fun clone(): Layer {
-        val cloned = OpacityLayer(alpha, offset)
+        val cloned = OpacityLayer(alpha)
         for (child in children) {
             cloned.children.add(child.clone())
         }
