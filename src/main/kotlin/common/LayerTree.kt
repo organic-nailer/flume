@@ -103,26 +103,15 @@ class TransformLayer(
 }
 
 class OpacityLayer(
-    var alpha: Int? = null, var offset: Offset = Offset.zero,
+    var alpha: Int? = null
 ) : ContainerLayer() {
-    override fun preroll() {
-        super.preroll()
-
-        paintBounds = paintBounds.makeOffset(offset)
-    }
-
     override fun paint(context: PaintContext) {
         val paint = Paint()
         if (alpha != null) {
             paint.alpha = alpha!!
         }
-        context.canvas.save()
-        context.canvas.translate(offset.dx.toFloat(), offset.dy.toFloat())
-        val saveLayerBounds =
-            paintBounds.makeOffset(-offset.dx.toFloat(), -offset.dy.toFloat()).roundOut()
-        context.canvas.saveLayer(saveLayerBounds, paint)
+        context.canvas.saveLayer(paintBounds.roundOut(), paint)
         super.paint(context)
-        context.canvas.restore()
         context.canvas.restore()
     }
 }
