@@ -32,7 +32,7 @@ class PaintingContext(
                 childLayer = TransformLayer()
                 child.layer = childLayer
             } else {
-                childLayer.removeAllChildren()
+                childLayer.children.clear()
             }
             val childContext = PaintingContext(childLayer, child.size.and(Offset.zero))
 
@@ -61,7 +61,7 @@ class PaintingContext(
         currentLayer = PictureLayer()
         recorder = PictureRecorder()
         _canvas = recorder!!.beginRecording(estimatedBounds)
-        containerLayer.append(currentLayer!!)
+        containerLayer.children.add(currentLayer!!)
     }
 
 
@@ -100,14 +100,8 @@ class PaintingContext(
         }
         val childTransformLayer = child.layer as TransformLayer
         childTransformLayer.transform = Matrix33.makeTranslate(offset.dx.toFloat(), offset.dy.toFloat())
-        appendLayer(childTransformLayer)
+        containerLayer.children.add(childTransformLayer)
     }
-
-    fun appendLayer(layer: Layer) {
-        layer.remove()
-        containerLayer.append(layer)
-    }
-
 
     fun pushLayer(
         childLayer: ContainerLayer,
@@ -116,12 +110,12 @@ class PaintingContext(
         childPaintBounds: Rect? = null,
     ) {
         if (childLayer.children.isNotEmpty()) {
-            childLayer.removeAllChildren()
+            childLayer.children.clear()
         }
 
         // 新しいレイヤーを作るときは現在のPictureLayerを終了する
         stopRecordingIfNeeded()
-        containerLayer.append(childLayer)
+        containerLayer.children.add(childLayer)
 
         // 新しいPaintingContextで再帰的に動作させる
         val childContext = PaintingContext(childLayer, childPaintBounds ?: estimatedBounds)
