@@ -91,7 +91,7 @@ class PictureLayer : Layer() {
 }
 
 class TransformLayer(
-    val transform: Matrix33 = Matrix33.IDENTITY,
+    var transform: Matrix33 = Matrix33.IDENTITY,
 ) : ContainerLayer() {
     companion object {
         fun withOffset(
