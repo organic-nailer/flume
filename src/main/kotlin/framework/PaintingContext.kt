@@ -7,12 +7,12 @@ import common.ClipRectLayer
 import common.ContainerLayer
 import common.Layer
 import common.Offset
-import common.OffsetLayer
-import common.OpacityLayer
 import common.PictureLayer
+import common.TransformLayer
 import common.makeOffset
 import framework.render.RenderObject
 import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.Matrix33
 import org.jetbrains.skia.Path
 import org.jetbrains.skia.PictureRecorder
 import org.jetbrains.skia.RRect
@@ -27,9 +27,9 @@ class PaintingContext(
          * [RenderObject.isRepaintBoundary] == trueのRenderObjectの下位Layerを再構築する
          */
         fun repaintCompositedChild(child: RenderObject) {
-            var childLayer = child.layer as OffsetLayer?
+            var childLayer = child.layer as TransformLayer?
             if (childLayer == null) {
-                childLayer = OffsetLayer()
+                childLayer = TransformLayer()
                 child.layer = childLayer
             } else {
                 childLayer.removeAllChildren()
@@ -98,9 +98,9 @@ class PaintingContext(
         if (child.needsPaint) {
             repaintCompositedChild(child)
         }
-        val childOffsetLayer = child.layer as OffsetLayer
-        childOffsetLayer.offset = offset
-        appendLayer(childOffsetLayer)
+        val childTransformLayer = child.layer as TransformLayer
+        childTransformLayer.transform = Matrix33.makeTranslate(offset.dx.toFloat(), offset.dy.toFloat())
+        appendLayer(childTransformLayer)
     }
 
     fun appendLayer(layer: Layer) {

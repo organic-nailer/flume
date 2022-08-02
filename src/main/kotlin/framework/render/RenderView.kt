@@ -31,7 +31,7 @@ class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjec
     }
 
     fun prepareInitialFrame() {
-        scheduleInitialPaint(TransformLayer(offset = Offset.zero))
+        scheduleInitialPaint(TransformLayer())
     }
 
     private fun scheduleInitialPaint(rootLayer: ContainerLayer) {
