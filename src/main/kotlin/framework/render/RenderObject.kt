@@ -49,10 +49,8 @@ abstract class RenderObject {
                 it.nodesNeedingPaint.add(this)
                 it.requestVisualUpdate()
             }
-        } else if (parent is RenderObject) {
+        } else {
             parent!!.markNeedsPaint()
-        } else { // root node
-            owner?.requestVisualUpdate()
         }
     }
 
