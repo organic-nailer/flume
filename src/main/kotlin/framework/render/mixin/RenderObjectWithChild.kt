@@ -42,13 +42,6 @@ interface RenderObjectWithChild<ChildType : RenderObject> {
             }
         }
     }
-
-    /**
-     * Implement先の[RenderObject.visitChildren]で必ず呼ぶ
-     */
-    fun visitChildren(visitor: RenderObjectVisitor) {
-        child?.let(visitor)
-    }
 }
 
 typealias RenderObjectVisitor = (child: RenderObject) -> Unit
