@@ -54,3 +54,5 @@ interface RenderObjectWithChild<ChildType : RenderObject> {
         }
     }
 }
+
+typealias RenderObjectVisitor = (child: RenderObject) -> Unit

@@ -31,7 +31,7 @@ class Shell(
     }
 
     override fun scheduleFrame() {
-        if(vsyncCallback == null) {
+        if (vsyncCallback == null) {
             vsyncCallback = {
                 taskRunners.uiTaskRunner.postTask {
                     // Flutter Animatorだと分岐があるけど
