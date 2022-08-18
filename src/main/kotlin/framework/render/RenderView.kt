@@ -40,7 +40,7 @@ class RenderView(configuration: ViewConfiguration) : RenderObject(), RenderObjec
 
     fun prepareInitialFrame() {
         scheduleInitialLayout()
-        scheduleInitialPaint(TransformLayer(offset = Offset.zero))
+        scheduleInitialPaint(TransformLayer())
     }
 
     private fun scheduleInitialLayout() {

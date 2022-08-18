@@ -24,9 +24,9 @@ class RenderPositionedBox(
             child!!.layout(constraints.loosen(), parentUsesSize = true)
             size = constraints.constrain(Size(
                 if (shrinkWrapWidth) child!!.size.width * (widthFactor
-                    ?: 0.0) else Double.POSITIVE_INFINITY,
+                    ?: 1.0) else Double.POSITIVE_INFINITY,
                 if (shrinkWrapHeight) child!!.size.height * (heightFactor
-                    ?: 0.0) else Double.POSITIVE_INFINITY,
+                    ?: 1.0) else Double.POSITIVE_INFINITY,
             ))
             alignChild()
         } else {
