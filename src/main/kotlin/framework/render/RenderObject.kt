@@ -131,6 +131,10 @@ abstract class RenderObject {
 
     open fun attach(owner: RenderPipeline) {
         this.owner = owner
+        if (needsLayout && relayoutBoundary != null) {
+            needsLayout = false
+            markNeedsLayout()
+        }
         if (needsPaint && layer != null) {
             needsPaint = false
             markNeedsPaint()
