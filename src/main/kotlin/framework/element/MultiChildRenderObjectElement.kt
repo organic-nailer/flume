@@ -4,9 +4,9 @@ import framework.render.RenderObject
 import framework.render.mixin.ContainerRenderObject
 import framework.widget.MultiChildRenderObjectWidget
 
-class MultiChildRenderObjectElement(widget: MultiChildRenderObjectWidget) :
-        RenderObjectElement(widget) {
-    val widgetCasted: MultiChildRenderObjectWidget = widget
+class MultiChildRenderObjectElement<T: RenderObject>(widget: MultiChildRenderObjectWidget<T>) :
+        RenderObjectElement<T>(widget) {
+    val widgetCasted: MultiChildRenderObjectWidget<T> = widget
     private var children: List<Element> = listOf()
 
     override fun mount(parent: Element?) {

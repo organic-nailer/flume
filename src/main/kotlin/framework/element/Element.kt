@@ -15,7 +15,7 @@ abstract class Element(
         get() {
             var result: RenderObject? = null
             fun visit(element: Element) {
-                if(element is RenderObjectElement) {
+                if(element is RenderObjectElement<*>) {
                     result = element.renderObject
                 } else {
                     element.visitChildren { visit(it) }
