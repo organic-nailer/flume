@@ -5,8 +5,12 @@ import framework.widget.Widget
 
 abstract class Element(
     open var widget: Widget?,
-) {
+): Comparable<Element> {
     var parent: Element? = null
+    var depth: Int = 0
+    var owner: BuildOwner? = null
+    var dirty: Boolean = true
+    var inDirtyList: Boolean = false
 
     /**
      * 自分と子を探索して一番近い[RenderObjectElement]の持つ[RenderObject]を返す
@@ -38,16 +42,44 @@ abstract class Element(
      */
     open fun mount(parent: Element?) {
         this.parent = parent
+        depth = if (parent != null) parent.depth + 1 else 1
+        parent?.let {
+            owner = it.owner
+        }
     }
 
     /**
      * 子となるWidget/Elementをとりそれらをツリー下部として展開する
      */
-    protected fun updateChild(child: Element?, newWidget: Widget?): Element? {
-        // とりあえずchildが来る場合は考えない
-        assert(child == null)
-        if (newWidget == null) return null
-        return inflateWidget(newWidget)
+    fun updateChild(child: Element?, newWidget: Widget?): Element? {
+        if (newWidget == null) {
+            if (child != null) {
+                deactivateChild(child)
+            }
+            return null
+        }
+        if (child != null) {
+            val newChild: Element
+            // Flutterではここで`hasSameSuperclass`ということを確認しているが、
+            // HotReloadによるStatefulElementとStatelessElementの置換を検知するものなので
+            // 省略する
+            if (child.widget == newWidget) {
+                newChild = child
+            } else if (Widget.canUpdate(child.widget!!, newWidget)) {
+                child.update(newWidget)
+                newChild = child
+            } else {
+                deactivateChild(child)
+                newChild = inflateWidget(newWidget)
+            }
+            return newChild
+        } else {
+            return inflateWidget(newWidget)
+        }
+    }
+
+    open fun update(newWidget: Widget) {
+        widget = newWidget
     }
 
     /**
@@ -59,11 +91,44 @@ abstract class Element(
         return newChild
     }
 
-    /**
-     * 自身がRenderObjectを持つ場合はRenderツリーにそれを追加する
-     */
-    protected open fun attachRenderObject() {
+    open fun attachRenderObject() {}
 
+    open fun detachRenderObject() {
+        visitChildren {
+            it.detachRenderObject()
+        }
+    }
+
+    protected fun deactivateChild(child: Element) {
+        child.parent = null
+        child.detachRenderObject()
+    }
+
+    fun didChangeDependencies() {
+        markNeedsBuild()
+    }
+
+    fun markNeedsBuild() {
+        if (dirty) return
+        dirty = true
+        owner!!.scheduleBuildFor(this)
+    }
+
+    fun rebuild() {
+        performRebuild()
+    }
+
+    abstract fun performRebuild()
+
+
+    override operator fun compareTo(other: Element): Int {
+        when {
+            depth < other.depth -> return -1
+            other.depth < depth -> return 1
+            !dirty && other.dirty -> return -1
+            dirty && !other.dirty -> return 1
+        }
+        return 0
     }
 }
 

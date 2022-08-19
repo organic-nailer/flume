@@ -2,21 +2,46 @@ package framework.element
 
 import framework.render.RenderObject
 import framework.widget.RenderObjectWidget
+import framework.widget.Widget
 
 abstract class RenderObjectElement<T: RenderObject>(
     widget: RenderObjectWidget<T>
 ) : Element(widget) {
+    private val widgetCasted: RenderObjectWidget<T>
+        get() = widget as RenderObjectWidget<T>
+
     override var renderObject: RenderObject? = null
+
+    private var ancestorRenderObjectElement: RenderObjectElement<*>? = null
+
 
     override fun mount(parent: Element?) {
         super.mount(parent)
         renderObject = (widget as RenderObjectWidget<*>).createRenderObject()
         attachRenderObject()
+        dirty = false
+    }
+
+    override fun update(newWidget: Widget) {
+        super.update(newWidget)
+        performRebuild()
+    }
+
+    override fun performRebuild() {
+        widgetCasted.updateRenderObject(renderObject as T)
+        dirty = false
     }
 
     override fun attachRenderObject() {
-        val ancestorRenderObjectElement = findAncestorRenderObjectElement()
+        ancestorRenderObjectElement = findAncestorRenderObjectElement()
         ancestorRenderObjectElement?.insertRenderObjectChild(renderObject!!)
+    }
+
+    override fun detachRenderObject() {
+        if (ancestorRenderObjectElement != null) {
+            ancestorRenderObjectElement!!.removeRenderObjectChild(renderObject!!)
+            ancestorRenderObjectElement = null
+        }
     }
 
     /**
@@ -38,4 +63,7 @@ abstract class RenderObjectElement<T: RenderObject>(
 
     }
 
+    open fun removeRenderObjectChild(child: RenderObject) {
+
+    }
 }

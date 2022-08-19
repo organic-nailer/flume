@@ -16,6 +16,13 @@ interface RenderObjectWithChild<ChildType : RenderObject> {
     }
 
     /**
+     * Implement先の[RenderObject.detach]で必ず呼ぶ
+     */
+    fun detachChild() {
+        child?.detach()
+    }
+
+    /**
      * Implement先の[RenderObject.visitChildren]で必ず呼ぶ
      */
     fun visitChildren(visitor: RenderObjectVisitor) {
@@ -36,6 +43,9 @@ interface RenderObjectWithChild<ChildType : RenderObject> {
         }
 
         operator fun setValue(thisRef: RenderObject, property: KProperty<*>, value: ChildType?) {
+            if (child != null) {
+                thisRef.dropChild(child!!)
+            }
             child = value
             child?.let {
                 thisRef.adoptChild(it)

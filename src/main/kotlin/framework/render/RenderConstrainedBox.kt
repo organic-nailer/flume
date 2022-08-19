@@ -3,8 +3,9 @@ package framework.render
 import framework.geometrics.BoxConstraints
 
 class RenderConstrainedBox(
-    private val additionalConstraints: BoxConstraints,
+    additionalConstraints: BoxConstraints,
 ) : RenderProxyBox() {
+    var additionalConstraints: BoxConstraints by MarkLayoutProperty(additionalConstraints)
 
     override fun performLayout() {
         if (child != null) {

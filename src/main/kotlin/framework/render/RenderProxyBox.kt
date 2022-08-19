@@ -27,6 +27,11 @@ abstract class RenderProxyBox : RenderBox(), RenderObjectWithChild<RenderBox> {
         attachChild(owner)
     }
 
+    override fun detach() {
+        super.detach()
+        detachChild()
+    }
+
     override fun visitChildren(visitor: RenderObjectVisitor) {
         super<RenderObjectWithChild>.visitChildren(visitor)
     }

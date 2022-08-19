@@ -7,4 +7,8 @@ class ColoredBox(
     val color: Int,
 ) : SingleChildRenderObjectWidget<RenderColoredBox>(child) {
     override fun createRenderObject(): RenderColoredBox = RenderColoredBox(color)
+
+    override fun updateRenderObject(renderObject: RenderColoredBox) {
+        renderObject.color = color
+    }
 }
