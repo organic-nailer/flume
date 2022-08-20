@@ -156,6 +156,7 @@ abstract class RenderObject {
 
     fun adoptChild(child: RenderObject) {
         setupParentData(child)
+        markNeedsLayout()
         child.parent = this
         if (attached) {
             child.attach(owner!!)
