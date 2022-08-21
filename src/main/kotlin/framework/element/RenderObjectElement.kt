@@ -4,8 +4,8 @@ import framework.render.RenderObject
 import framework.widget.RenderObjectWidget
 import framework.widget.Widget
 
-abstract class RenderObjectElement<T : RenderObject>(
-    widget: RenderObjectWidget<T>,
+abstract class RenderObjectElement<T: RenderObject>(
+    widget: RenderObjectWidget<T>
 ) : Element(widget) {
     private val widgetCasted: RenderObjectWidget<T>
         get() = widget as RenderObjectWidget<T>
@@ -13,6 +13,7 @@ abstract class RenderObjectElement<T : RenderObject>(
     override var renderObject: RenderObject? = null
 
     private var ancestorRenderObjectElement: RenderObjectElement<*>? = null
+
 
     override fun mount(parent: Element?) {
         super.mount(parent)
@@ -122,7 +123,7 @@ abstract class RenderObjectElement<T : RenderObject>(
      */
     fun findAncestorRenderObjectElement(): RenderObjectElement<*>? {
         var ancestor = parent
-        while (ancestor != null && ancestor !is RenderObjectElement<*>) {
+        while(ancestor != null && ancestor !is RenderObjectElement<*>) {
             ancestor = ancestor.parent
         }
         return ancestor as RenderObjectElement<*>?
@@ -139,5 +140,4 @@ abstract class RenderObjectElement<T : RenderObject>(
     open fun removeRenderObjectChild(child: RenderObject) {
 
     }
-
 }

@@ -17,12 +17,7 @@ import kotlin.math.ceil
 class RenderParagraph(
     text: TextSpan,
 ) : RenderBox(), ContainerRenderObject<RenderBox> {
-    var text: TextSpan = text
-        set(value) {
-            if (field == value) return
-            field = value
-            markNeedsLayout()
-        }
+    var text: TextSpan by MarkLayoutProperty(text)
 
     private val textPainter = TextPainter(text)
     override val thisRef: RenderObject = this
@@ -77,8 +72,6 @@ class TextPainter(
             markNeedsLayout()
         }
     private var paragraph: Paragraph? = null
-    private var lastMinWidth: Double? = null
-    private var lastMaxWidth: Double? = null
     val width: Double get() = paragraph!!.maxWidth.toDouble()
     val height: Double get() = paragraph!!.height.toDouble()
     val size: Size get() = Size(width, height)
@@ -115,9 +108,7 @@ class TextPainter(
     }
 
     fun layout(minWidth: Double = 0.0, maxWidth: Double = Double.POSITIVE_INFINITY) {
-        lastMinWidth = minWidth
-        lastMaxWidth = maxWidth
-        if (paragraph == null) {
+        if(paragraph == null) {
             createParagraph()
         }
         layoutParagraph(minWidth, maxWidth)

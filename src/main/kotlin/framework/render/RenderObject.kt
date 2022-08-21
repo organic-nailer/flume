@@ -106,10 +106,8 @@ abstract class RenderObject {
                 it.nodesNeedingPaint.add(this)
                 it.requestVisualUpdate()
             }
-        } else if (parent is RenderObject) {
+        } else {
             parent!!.markNeedsPaint()
-        } else { // root node
-            owner?.requestVisualUpdate()
         }
     }
 
@@ -179,15 +177,6 @@ abstract class RenderObject {
             child.detach()
         }
         markNeedsLayout()
-    }
-
-    /**
-     * RenderObjectを破棄する時に呼ぶ
-     *
-     * layerの参照を持っていれば捨てる
-     */
-    open fun dispose() {
-        layer = null
     }
 }
 

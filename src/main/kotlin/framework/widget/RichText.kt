@@ -5,9 +5,11 @@ import framework.render.TextSpan
 
 class RichText(
     val text: TextSpan,
-) : MultiChildRenderObjectWidget<RenderParagraph>(listOf()) {
+): MultiChildRenderObjectWidget<RenderParagraph>(listOf()) {
     override fun createRenderObject(): RenderParagraph {
-        return RenderParagraph(text)
+        return RenderParagraph(
+            text
+        )
     }
 
     override fun updateRenderObject(renderObject: RenderParagraph) {
