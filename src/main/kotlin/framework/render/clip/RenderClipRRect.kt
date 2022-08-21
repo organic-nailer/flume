@@ -1,6 +1,7 @@
 package framework.render.clip
 
 import common.Clip
+import common.ClipRRectLayer
 import common.Offset
 import framework.PaintingContext
 import framework.painting.BorderRadius
@@ -17,11 +18,11 @@ class RenderClipRRect(
 
     override fun paint(context: PaintingContext, offset: Offset) {
         if (child != null) {
-            context.pushClipRRect(offset,
-                clip!!,
-                clip!!,
-                { c, o -> super.paint(c, o) },
-                clipBehavior)
+            layer = context.pushClipRRect(
+                offset, clip!!, clip!!, { c, o -> super.paint(c, o) }, clipBehavior, layer as ClipRRectLayer?
+            )
+        } else {
+            layer = null
         }
     }
 }
