@@ -178,15 +178,6 @@ abstract class RenderObject {
         }
         markNeedsLayout()
     }
-
-    /**
-     * RenderObjectを破棄する時に呼ぶ
-     *
-     * layerの参照を持っていれば捨てる
-     */
-    open fun dispose() {
-        layer = null
-    }
 }
 
 typealias RenderObjectVisitor = (child: RenderObject) -> Unit
