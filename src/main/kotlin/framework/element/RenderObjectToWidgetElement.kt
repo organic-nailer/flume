@@ -6,8 +6,7 @@ import framework.widget.RenderObjectToWidgetAdapter
 import framework.widget.RenderObjectWidget
 import framework.widget.Widget
 
-class RenderObjectToWidgetElement<T : RenderObject>(widget: RenderObjectWidget<T>) :
-        RenderObjectElement<T>(widget) {
+class RenderObjectToWidgetElement<T: RenderObject>(widget: RenderObjectWidget<T>) : RenderObjectElement<T>(widget) {
     private var child: Element? = null
     var newWidget: Widget? = null
 

@@ -22,7 +22,6 @@ interface RenderObjectWithChild<ChildType : RenderObject> {
         child?.detach()
     }
 
-
     /**
      * Implement先の[RenderObject.visitChildren]で必ず呼ぶ
      */
