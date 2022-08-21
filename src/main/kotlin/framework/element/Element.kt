@@ -107,7 +107,7 @@ abstract class Element(
         child.detachRenderObject()
     }
 
-    fun didChangeDependencies() {
+    open fun didChangeDependencies() {
         markNeedsBuild()
     }
 
