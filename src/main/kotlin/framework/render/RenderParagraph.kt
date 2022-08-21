@@ -17,7 +17,13 @@ import kotlin.math.ceil
 class RenderParagraph(
     text: TextSpan,
 ) : RenderBox(), ContainerRenderObject<RenderBox> {
-    var text: TextSpan by MarkLayoutProperty(text)
+    var text: TextSpan
+        get() = textPainter.text
+        set(value) {
+            if(textPainter.text == value) return
+            textPainter.text = value
+            markNeedsLayout()
+        }
 
     private val textPainter = TextPainter(text)
     override val thisRef: RenderObject = this
