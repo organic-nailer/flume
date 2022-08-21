@@ -1,6 +1,7 @@
 package framework.render.clip
 
 import common.Clip
+import common.ClipPathLayer
 import common.Offset
 import framework.PaintingContext
 import org.jetbrains.skia.Path
@@ -16,11 +17,16 @@ class RenderClipPath(
 
     override fun paint(context: PaintingContext, offset: Offset) {
         if (child != null) {
-            context.pushClipPath(offset,
+            layer = context.pushClipPath(
+                offset,
                 size.and(Offset.zero),
                 clip!!,
                 { c, o -> super.paint(c, o) },
-                clipBehavior)
+                clipBehavior,
+                layer as ClipPathLayer?
+            )
+        } else {
+            layer = null
         }
     }
 }
