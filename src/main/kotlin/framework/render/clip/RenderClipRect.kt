@@ -1,6 +1,7 @@
 package framework.render.clip
 
 import common.Clip
+import common.ClipRectLayer
 import common.Offset
 import framework.PaintingContext
 import org.jetbrains.skia.Rect
@@ -13,7 +14,11 @@ class RenderClipRect(
 
     override fun paint(context: PaintingContext, offset: Offset) {
         if (child != null) {
-            context.pushClipRect(offset, clip!!, { c, o -> super.paint(c, o) }, clipBehavior)
+            layer = context.pushClipRect(
+                offset, clip!!, { c, o -> super.paint(c, o) }, clipBehavior, layer as ClipRectLayer?
+            )
+        } else {
+            layer = null
         }
     }
 }
