@@ -22,7 +22,7 @@ abstract class Element(
         get() {
             var result: RenderObject? = null
             fun visit(element: Element) {
-                if (element is RenderObjectElement<*>) {
+                if(element is RenderObjectElement<*>) {
                     result = element.renderObject
                 } else {
                     element.visitChildren { visit(it) }
@@ -94,9 +94,6 @@ abstract class Element(
         return newChild
     }
 
-    /**
-     * 自身がRenderObjectを持つ場合はRenderツリーにそれを追加する
-     */
     open fun attachRenderObject() {}
 
     open fun detachRenderObject() {
@@ -110,7 +107,7 @@ abstract class Element(
         child.detachRenderObject()
     }
 
-    fun didChangeDependencies() {
+    open fun didChangeDependencies() {
         markNeedsBuild()
     }
 
@@ -126,9 +123,7 @@ abstract class Element(
 
     abstract fun performRebuild()
 
-    /**
-     * 階層が深いほど大きく、同じ深さならdirtyな方が大きい
-     */
+
     override operator fun compareTo(other: Element): Int {
         when {
             depth < other.depth -> return -1

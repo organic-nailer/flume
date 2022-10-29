@@ -47,108 +47,153 @@ class Propagator<T> {
 
 class MyPage(private val propagator: Propagator<KeyEvent>): StatelessWidget() {
     override fun build(context: BuildContext): Widget {
-        return MyStatefulView(propagator)
+        return TicTakToeView(propagator)
     }
 }
 
-class MyStatefulView(val propagator: Propagator<KeyEvent>): StatefulWidget() {
-    override fun createState(): State<*> = MyState()
+class TicTakToeView(val propagator: Propagator<KeyEvent>): StatefulWidget() {
+    override fun createState(): State<*> = TicTakToeState()
 }
 
-class MyState: State<MyStatefulView>() {
-    private val darken = 0xFF9E9E9E.toInt()
-    private var phase: LightPhase = LightPhase.All
+enum class Player {
+    X, O
+}
+
+class TicTakToeState: State<TicTakToeView>() {
+    val lines = listOf(
+        listOf(listOf(0, 0), listOf(0, 1), listOf(0, 2)), // 横向き
+        listOf(listOf(1, 0), listOf(1, 1), listOf(1, 2)),
+        listOf(listOf(2, 0), listOf(2, 1), listOf(2, 2)),
+        listOf(listOf(0, 0), listOf(1, 0), listOf(2, 0)), // 縦向き
+        listOf(listOf(0, 1), listOf(1, 1), listOf(2, 1)),
+        listOf(listOf(0, 2), listOf(1, 2), listOf(2, 2)),
+        listOf(listOf(0, 0), listOf(1, 1), listOf(2, 2)), // 斜め
+        listOf(listOf(0, 2), listOf(1, 1), listOf(2, 0)),
+    )
+
+    private val field: List<MutableList<CellView.CellState>> = listOf(
+        mutableListOf(CellView.CellState.Empty, CellView.CellState.Empty, CellView.CellState.Empty),
+        mutableListOf(CellView.CellState.Empty, CellView.CellState.Empty, CellView.CellState.Empty),
+        mutableListOf(CellView.CellState.Empty, CellView.CellState.Empty, CellView.CellState.Empty),
+    )
+    private var currentPlayer: Player = Player.X
+    private var winner: Player? = null
+    private var finished: Boolean = false
 
     override fun didChangeDependencies() {
         super.didChangeDependencies()
         widget.propagator.listener = {
-            setState {
-                phase = when(it.character) {
-                    "r" -> LightPhase.Red
-                    "y" -> LightPhase.Yellow
-                    "g" -> LightPhase.Green
-                    "a" -> LightPhase.All
-                    else -> phase
+            if(it.phase == KeyEvent.KeyEventPhase.KeyUp) {
+                var row: Int? = null
+                var column: Int? = null
+                when(it.character) {
+                    "q" -> { row = 0; column = 0 }
+                    "w" -> { row = 0; column = 1 }
+                    "e" -> { row = 0; column = 2 }
+                    "a" -> { row = 1; column = 0 }
+                    "s" -> { row = 1; column = 1 }
+                    "d" -> { row = 1; column = 2 }
+                    "z" -> { row = 2; column = 0 }
+                    "x" -> { row = 2; column = 1 }
+                    "c" -> { row = 2; column = 2 }
+                }
+                if (row != null && column != null) {
+                    updateField(currentPlayer, row, column)
                 }
             }
         }
     }
 
+    private fun updateField(player: Player, row: Int, column: Int) {
+        if (finished) return
+        if (field[row][column] != CellView.CellState.Empty) return
+        setState {
+            when(player) {
+                Player.X -> {
+                    field[row][column] = CellView.CellState.Xs
+                    currentPlayer = Player.O
+                }
+                Player.O -> {
+                    field[row][column] = CellView.CellState.Os
+                    currentPlayer = Player.X
+                }
+            }
+            checkIfGameFinished()
+        }
+    }
+
+    private fun checkIfGameFinished() {
+        // 揃っている直線がないか探索する
+        for (line in lines) {
+            val first = field[line[0][0]][line[0][1]]
+            val second = field[line[1][0]][line[1][1]]
+            val third = field[line[2][0]][line[2][1]]
+            if (first != CellView.CellState.Empty && first == second && second == third) {
+                finished = true
+                winner = if (first == CellView.CellState.Os) Player.O else Player.X
+                return
+            }
+        }
+
+        // マスが全て埋まっているかどうか確認する
+        var isFilled = true
+        for (row in 0..2) {
+            for (column in 0..2) {
+                if (field[row][column] == CellView.CellState.Empty) {
+                    isFilled = false
+                }
+            }
+        }
+        if (isFilled) {
+            finished = true
+            winner = null
+        }
+    }
+
     override fun build(context: BuildContext): Widget {
+        var message = if(finished) {
+            if(winner != null) "${winner!!.name}の勝利" else "引き分け"
+        } else {
+            "${currentPlayer.name}の手番"
+        }
         return Align(
             child = Flex(
-                mainAxisSize = MainAxisSize.Min,
                 direction = Axis.Vertical,
+                mainAxisSize = MainAxisSize.Min,
                 children = listOf(
-                    ClipPath(
-                        clipper = ArcClipper(),
-                        child = SizedBox(
-                            width = 100.0, height = 100.0,
-                            child = ColoredBox(
-                                color = if(phase in listOf(LightPhase.Red, LightPhase.All)) 0xFFF44336.toInt()
-                                else darken
-                            )
-                        )
-                    ),
-                    ClipRRect(
-                        borderRadius = BorderRadius.circular(20.0),
-                        child = SizedBox(
-                            width = 100.0, height = 100.0,
-                            child = ColoredBox(
-                                color = if(phase in listOf(LightPhase.Yellow, LightPhase.All)) 0xFFFFEB3B.toInt()
-                                else darken
-                            )
-                        )
-                    ),
-                    ClipOval(
-                        child = SizedBox(
-                            width = 100.0, height = 100.0,
-                            child = ColoredBox(
-                                color = if(phase in listOf(LightPhase.Green, LightPhase.All)) 0xFF4CAF50.toInt()
-                                else darken
-                            )
-                        )
-                    ),
-                    RichText(
-                        TextSpan(
-                            "信号機だよ",
-                            textStyle = TextStyle().apply {
-                                color = 0xFFFF0000.toInt()
-                                fontSize = 50f
+                    RichText(TextSpan(message)),
+                    *field.map { row ->
+                        return@map Flex(
+                            direction = Axis.Horizontal,
+                            mainAxisSize = MainAxisSize.Min,
+                            children = row.map { cell ->
+                                CellView(cell)
                             }
                         )
-                    )
+                    }.toTypedArray()
                 )
             )
         )
     }
 }
 
-enum class LightPhase {
-    Red, Green, Yellow, All
-}
-
-class ArcClipper: CustomClipper<Path>() {
-    override fun getClip(size: Size): Path {
-        return Path().apply {
-            lineTo(0f, size.height.toFloat() - 30f)
-
-            val firstControlPoint = Offset(size.width / 4, size.height)
-            val firstPoint = Offset(size.width / 2, size.height)
-            quadTo(firstControlPoint.dx.toFloat(),
-                firstControlPoint.dy.toFloat(),
-                firstPoint.dx.toFloat(),
-                firstPoint.dy.toFloat())
-
-            val secondControlPoint = Offset(size.width - size.width / 4, size.height)
-            val secondPoint = Offset(size.width, size.height - 30)
-            quadTo(secondControlPoint.dx.toFloat(),
-                secondControlPoint.dy.toFloat(),
-                secondPoint.dx.toFloat(),
-                secondPoint.dy.toFloat())
-            lineTo(size.width.toFloat(), 0f)
-            closePath()
-        }
+class CellView(private val state: CellState): StatelessWidget() {
+    override fun build(context: BuildContext): Widget {
+        return SizedBox(
+            width = 100.0, height = 100.0,
+            child = Align(
+                child = RichText(text = TextSpan(
+                    when(state) {
+                        CellState.Xs -> "X"
+                        CellState.Os -> "O"
+                        CellState.Empty -> "-"
+                    }
+                ))
+            )
+        )
     }
-    override fun shouldReclip(oldClipper: CustomClipper<Path>): Boolean = false
+
+    enum class CellState {
+        Xs, Os, Empty
+    }
 }

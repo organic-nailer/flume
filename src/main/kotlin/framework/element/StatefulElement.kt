@@ -40,4 +40,9 @@ class StatefulElement(widget: StatefulWidget) : ComponentElement(widget) {
         state.didUpdateWidget(oldWidget)
         rebuild()
     }
+
+    override fun didChangeDependencies() {
+        super.didChangeDependencies()
+        didChangeDependencies = true
+    }
 }

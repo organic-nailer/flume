@@ -5,7 +5,7 @@ import framework.render.mixin.RenderObjectWithChild
 import framework.widget.SingleChildRenderObjectWidget
 import framework.widget.Widget
 
-class SingleChildRenderObjectElement<T : RenderObject>(widget: SingleChildRenderObjectWidget<T>) :
+class SingleChildRenderObjectElement<T: RenderObject>(widget: SingleChildRenderObjectWidget<T>) :
         RenderObjectElement<T>(widget) {
     val widgetCasted: SingleChildRenderObjectWidget<T> get() = widget as SingleChildRenderObjectWidget<T>
     private var child: Element? = null
