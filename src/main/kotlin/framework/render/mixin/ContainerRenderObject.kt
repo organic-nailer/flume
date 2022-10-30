@@ -1,6 +1,10 @@
 package framework.render.mixin
 
+import common.Offset
 import framework.RenderPipeline
+import framework.gesture.HitTestResult
+import framework.render.BoxParentData
+import framework.render.RenderBox
 import framework.render.RenderObject
 import framework.render.RenderObjectVisitor
 
@@ -52,5 +56,29 @@ interface ContainerRenderObject<ChildType : RenderObject> {
         for (child in children) {
             child.let(callback)
         }
+    }
+
+    /**
+     * 複数の子を持つ場合の標準のHitTest
+     *
+     * [ChildType] is [RenderBox] のときのみ呼び出し可
+     *
+     * どれかの子に判定があれば即終了する
+     */
+    fun defaultHitTestChildren(result: HitTestResult, position: Offset): Boolean {
+        for(child in children) {
+            val childParentData = child.parentData as BoxParentData
+            val isHit = result.addWithPaintOffset(
+                offset = childParentData.offset,
+                position = position,
+                hitTest = { testResult, transformed ->
+                    (child as RenderBox).hitTest(testResult, transformed)
+                }
+            )
+            if(isHit) {
+                return true
+            }
+        }
+        return false
     }
 }

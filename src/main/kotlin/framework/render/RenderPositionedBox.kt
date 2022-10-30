@@ -5,6 +5,7 @@ import common.Size
 import framework.PaintingContext
 import framework.RenderPipeline
 import framework.geometrics.Alignment
+import framework.gesture.HitTestResult
 import framework.render.mixin.RenderObjectWithChild
 
 class RenderPositionedBox(
@@ -69,5 +70,19 @@ class RenderPositionedBox(
 
     override fun redepthChildren() {
         super<RenderObjectWithChild>.redepthChildren { redepthChild(it) }
+    }
+
+    override fun hitTestChildren(result: HitTestResult, position: Offset): Boolean {
+        if(child != null) {
+            val childParentData = child!!.parentData as BoxParentData
+            return result.addWithPaintOffset(
+                offset = childParentData.offset,
+                position = position,
+                hitTest = { testResult, transformed ->
+                    child!!.hitTest(testResult, transformed)
+                }
+            )
+        }
+        return false
     }
 }

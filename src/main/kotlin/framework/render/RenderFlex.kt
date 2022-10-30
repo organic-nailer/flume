@@ -10,6 +10,7 @@ import framework.geometrics.CrossAxisAlignment
 import framework.geometrics.MainAxisAlignment
 import framework.geometrics.MainAxisSize
 import framework.geometrics.VerticalDirection
+import framework.gesture.HitTestResult
 import framework.render.mixin.ContainerRenderObject
 import kotlin.math.max
 
@@ -193,5 +194,9 @@ class RenderFlex(
     override fun detach() {
         super.detach()
         detachChildren()
+    }
+
+    override fun hitTestChildren(result: HitTestResult, position: Offset): Boolean {
+        return defaultHitTestChildren(result, position)
     }
 }

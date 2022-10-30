@@ -3,6 +3,7 @@ package framework.render
 import common.Offset
 import framework.PaintingContext
 import framework.RenderPipeline
+import framework.gesture.HitTestResult
 import framework.render.mixin.RenderObjectWithChild
 
 abstract class RenderProxyBox : RenderBox(), RenderObjectWithChild<RenderBox> {
@@ -38,5 +39,9 @@ abstract class RenderProxyBox : RenderBox(), RenderObjectWithChild<RenderBox> {
 
     override fun redepthChildren() {
         super<RenderObjectWithChild>.redepthChildren { redepthChild(it) }
+    }
+
+    override fun hitTestChildren(result: HitTestResult, position: Offset): Boolean {
+        return child?.hitTest(result, position) ?: false
     }
 }

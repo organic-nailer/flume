@@ -6,9 +6,10 @@ import common.Size
 import framework.PaintingContext
 import framework.RenderPipeline
 import framework.geometrics.BoxConstraints
+import framework.gesture.HitTestTarget
 import kotlin.reflect.KProperty
 
-abstract class RenderObject {
+abstract class RenderObject: HitTestTarget {
     companion object {
         private val cleanChildRelayoutBoundary: RenderObjectVisitor = {
             it.cleanRelayoutBounary()
