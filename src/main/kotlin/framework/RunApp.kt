@@ -2,6 +2,7 @@ package framework
 
 import common.KeyEvent
 import common.Layer
+import common.PointerEvent
 import framework.widget.Widget
 
 fun runApp(app: Widget) {
@@ -26,4 +27,6 @@ interface WidgetsBinding {
     fun beginFrame()
 
     fun handleKeyEvent(event: KeyEvent)
+
+    fun handlePointerEvent(event: PointerEvent)
 }

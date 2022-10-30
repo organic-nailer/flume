@@ -1,6 +1,7 @@
 package engine
 
 import common.KeyEvent
+import common.PointerEvent
 import org.jetbrains.skia.DirectContext
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL
@@ -8,6 +9,7 @@ import org.lwjgl.opengl.GL
 class GLView(width: Int, height: Int, private val delegate: GLViewDelegate) {
     private var windowHandle: Long = -1
     private val keyboardController: KeyboardController
+    private val pointerController: PointerController
 
     init {
         GLFW.glfwInit()
@@ -18,6 +20,9 @@ class GLView(width: Int, height: Int, private val delegate: GLViewDelegate) {
         GLFW.glfwShowWindow(windowHandle)
         keyboardController = KeyboardController(windowHandle) {
             if (!checkWindowClose(it)) delegate.onKeyEvent(it)
+        }
+        pointerController = PointerController(windowHandle) {
+            delegate.onPointerEvent(it)
         }
     }
 
@@ -53,5 +58,6 @@ class GLView(width: Int, height: Int, private val delegate: GLViewDelegate) {
 
     interface GLViewDelegate {
         fun onKeyEvent(event: KeyEvent)
+        fun onPointerEvent(event: PointerEvent)
     }
 }

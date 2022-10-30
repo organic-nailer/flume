@@ -3,6 +3,7 @@ package engine
 import common.KeyEvent
 import common.Layer
 import common.LayerTree
+import common.PointerEvent
 import common.Size
 import framework.Engine
 import framework.ViewConfiguration
@@ -58,6 +59,10 @@ class Shell(
 
     override fun onKeyEvent(event: KeyEvent) {
         binding.handleKeyEvent(event)
+    }
+
+    override fun onPointerEvent(event: PointerEvent) {
+        binding.handlePointerEvent(event)
     }
 
     fun run(appMain: () -> Unit) {

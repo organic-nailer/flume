@@ -2,6 +2,7 @@ package framework
 
 import common.ContainerLayer
 import common.KeyEvent
+import common.PointerEvent
 import framework.element.BuildOwner
 import framework.element.Element
 import framework.element.RenderObjectToWidgetElement
@@ -85,5 +86,9 @@ object WidgetsFlumeBinding : WidgetsBinding {
 
     override fun handleKeyEvent(event: KeyEvent) {
         keyEventListener?.invoke(event)
+    }
+
+    override fun handlePointerEvent(event: PointerEvent) {
+        println(event)
     }
 }
