@@ -4,6 +4,7 @@ import common.KeyEvent
 import common.Layer
 import common.PointerEvent
 import framework.widget.Widget
+import kotlin.time.Duration
 
 fun runApp(app: Widget) {
     WidgetsFlumeBinding.apply {
@@ -24,7 +25,7 @@ interface Engine {
 interface WidgetsBinding {
     fun connectToEngine(engine: Engine)
 
-    fun beginFrame()
+    fun beginFrame(elapsedTime: Duration)
 
     fun handleKeyEvent(event: KeyEvent)
 

@@ -9,6 +9,7 @@ import framework.Engine
 import framework.ViewConfiguration
 import framework.WidgetsBinding
 import framework.WidgetsFlumeBinding
+import kotlin.time.Duration
 
 class Shell(
     val taskRunners: TaskRunners,
@@ -17,7 +18,8 @@ class Shell(
 ) : Engine, GLView.GLViewDelegate {
     var glView: GLView = GLView(width, height, this)
     private var binding: WidgetsBinding = WidgetsFlumeBinding
-    private var vsyncCallback: (() -> Unit)? = null
+    private var vsyncCallback: ((Duration) -> Unit)? = null
+    private val timingMeasurer = TimingMeasurer()
 
     init {
         binding.connectToEngine(this)
@@ -33,12 +35,12 @@ class Shell(
 
     override fun scheduleFrame() {
         if (vsyncCallback == null) {
-            vsyncCallback = {
+            vsyncCallback = { elapsedTime ->
                 taskRunners.uiTaskRunner.postTask {
                     // Flutter Animatorだと分岐があるけど
                     // 基本的にlayerTreeは再利用されないようなので
                     // beginFrameのみを呼ぶ
-                    binding.beginFrame()
+                    binding.beginFrame(elapsedTime)
                 }
             }
         }
@@ -72,7 +74,8 @@ class Shell(
     }
 
     fun onVsync() {
-        vsyncCallback?.invoke()
+        val elapsedTime = timingMeasurer.getElapsedTime()
+        vsyncCallback?.invoke(elapsedTime)
         vsyncCallback = null
     }
 }

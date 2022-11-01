@@ -5,8 +5,8 @@ import common.ClipPathLayer
 import common.ClipRRectLayer
 import common.ClipRectLayer
 import common.ContainerLayer
-import common.Layer
 import common.Offset
+import common.OpacityLayer
 import common.PictureLayer
 import common.TransformLayer
 import common.makeOffset
@@ -175,6 +175,15 @@ class PaintingContext(
             it.clipBehavior = clipBehavior
         }
         pushLayer(layer, painter, offset, childPaintBounds = offsetClipRect)
+        return layer
+    }
+
+    fun pushOpacity(offset: Offset, alpha: Int, painter: PaintingContextCallback, oldLayer: OpacityLayer? = null): OpacityLayer {
+        val layer = oldLayer ?: OpacityLayer()
+        layer.let {
+            it.alpha = alpha
+        }
+        pushLayer(layer, painter, offset)
         return layer
     }
 }

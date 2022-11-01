@@ -14,6 +14,9 @@ import framework.gesture.HitTestTarget
 import framework.render.RenderView
 import framework.widget.RenderObjectToWidgetAdapter
 import framework.widget.Widget
+import kotlin.time.Duration
+
+typealias FrameCallback = (Duration) -> Unit
 
 object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
     lateinit var pipeline: RenderPipeline
@@ -23,6 +26,9 @@ object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
     var engineConnected = false
     var buildOwner: BuildOwner = BuildOwner { handleBuildScheduled() }
     private val hitTests = mutableMapOf<Int, HitTestResult>()
+    private var nextFrameCallbackId = 0
+    private val transientCallbacks = mutableMapOf<Int, FrameCallback>()
+    private var hasScheduledFrame = false
 
     override fun connectToEngine(engine: Engine) {
         this.engine = engine
@@ -45,7 +51,7 @@ object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
     }
 
     fun ensureVisualUpdate() {
-        engine.scheduleFrame()
+        scheduleFrame()
     }
 
     private fun handleBuildScheduled() {
@@ -63,8 +69,15 @@ object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
         }
     }
 
-    override fun beginFrame() {
+    override fun beginFrame(elapsedTime: Duration) {
         if (!initialized) return
+        hasScheduledFrame = false
+        val callbacks = transientCallbacks.toList()
+        transientCallbacks.clear()
+        for (callback in callbacks) {
+            callback.second(elapsedTime)
+        }
+
         drawFrame()
     }
 
@@ -73,7 +86,7 @@ object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
      *
      * WidgetsBinding.drawFrame() -> RendererBinding.drawFrame()
      */
-    fun drawFrame() {
+    private fun drawFrame() {
         // WidgetsBinding.drawFrame
         if (renderViewElement != null) {
             buildOwner.buildScope()
@@ -131,5 +144,22 @@ object WidgetsFlumeBinding : WidgetsBinding, HitTestTarget {
         for(entry in hitTestResult.path) {
             entry.target.handleEvent(event.apply { transform = entry.transform }, entry)
         }
+    }
+
+    fun scheduleFrameCallback(callback: FrameCallback): Int {
+        scheduleFrame()
+        nextFrameCallbackId++
+        transientCallbacks[nextFrameCallbackId] = callback
+        return nextFrameCallbackId
+    }
+
+    fun cancelFrameCallback(id: Int) {
+        transientCallbacks.remove(id)
+    }
+
+    fun scheduleFrame() {
+        if(hasScheduledFrame) return
+        engine.scheduleFrame()
+        hasScheduledFrame = true
     }
 }

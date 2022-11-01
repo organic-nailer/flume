@@ -1,14 +1,17 @@
 import engine.runFlume
+import framework.animation.AnimationController
+import framework.animation.TickerProvider
+import framework.animation.TickerProviderImpl
 import framework.element.BuildContext
-import framework.geometrics.Alignment
 import framework.runApp
-import framework.widget.Align
 import framework.widget.ColoredBox
+import framework.widget.FadeTransition
 import framework.widget.Listener
 import framework.widget.SizedBox
 import framework.widget.State
 import framework.widget.StatefulWidget
 import framework.widget.Widget
+import kotlin.time.Duration.Companion.seconds
 
 const val windowWidth = 640
 const val windowHeight = 480
@@ -22,56 +25,51 @@ fun main() {
 }
 
 fun appMain() {
-    runApp(DrawView())
+    runApp(MyStatefulWidget())
 }
 
-class DrawView: StatefulWidget() {
-    override fun createState(): State<*> = DrawViewState()
+class MyStatefulWidget: StatefulWidget() {
+    override fun createState(): State<*> = MyStatefulWidgetState()
 }
 
-class DrawViewState: State<DrawView>() {
-    var pointerX = 0.0
-    var pointerY = 0.0
-    var color = 0x00000000
+class MyStatefulWidgetState: State<MyStatefulWidget>(), TickerProvider by TickerProviderImpl() {
+    private val animationController = AnimationController(
+        initialValue = 1.0,
+        duration = 1.seconds,
+        vsync = this
+    )
+    private var isForward = false
+
+    private fun animate() {
+        if(isForward) {
+            animationController.forward(0.0)
+            isForward = false
+        }
+        else {
+            animationController.reverse(1.0)
+            isForward = true
+        }
+    }
+
     override fun build(context: BuildContext): Widget {
-        return Listener(
-            child = ColoredBox(
-                color = 0xFFDEDEDE.toInt(),
-                child = SizedBox(
-                    width = windowWidth.toDouble(),
-                    height = windowHeight.toDouble(),
-                    child = Align(
-                        alignment = Alignment(pointerX,pointerY),
-                        child = SizedBox(
-                            width = 20.0, height = 20.0,
-                            child = ColoredBox(
-                                color = color
-                            )
-                        )
-                    ),
+        return SizedBox(
+            child = Listener(
+                child = ColoredBox(
+                    color = 0xFF000000.toInt(),
+                    child = FadeTransition(
+                        opacity = animationController,
+                        child = ColoredBox(
+                            child = null,
+                            color = 0xFF00FF00.toInt()
+                        ),
+                    )
                 ),
+                onPointerUp = {
+                    animate()
+                },
             ),
-            onPointerDown = {
-                setState {
-                    pointerX = (it.x / windowWidth) * 2 - 1
-                    pointerY = (it.y / windowHeight) * 2 - 1
-                    color = 0xFFFF0000.toInt()
-                }
-            },
-            onPointerMove = {
-                setState {
-                    pointerX = (it.x / windowWidth) * 2 - 1
-                    pointerY = (it.y / windowHeight) * 2 - 1
-                    color = 0xFF00FF00.toInt()
-                }
-            },
-            onPointerUp = {
-                setState {
-                    pointerX = (it.x / windowWidth) * 2 - 1
-                    pointerY = (it.y / windowHeight) * 2 - 1
-                    color = 0xFF0000FF.toInt()
-                }
-            }
+            width = 100.0,
+            height = 100.0
         )
     }
 }
