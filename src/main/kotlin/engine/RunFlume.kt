@@ -15,6 +15,8 @@ fun runFlume(
     val shell = Shell(taskRunners, null, windowWidth, windowHeight)
     shell.initRasterThread()
 
+    Thread.sleep(1000)
+
     shell.run {
         appMain()
     }
