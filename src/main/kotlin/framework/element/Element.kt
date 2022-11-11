@@ -1,7 +1,9 @@
 package framework.element
 
 import framework.render.RenderObject
+import framework.widget.InheritedWidget
 import framework.widget.Widget
+import kotlin.reflect.KClass
 
 abstract class Element(
     widget: Widget,
@@ -49,6 +51,7 @@ abstract class Element(
         parent?.let {
             owner = it.owner
         }
+        updateInheritance()
     }
 
     /**
@@ -122,6 +125,38 @@ abstract class Element(
     }
 
     abstract fun performRebuild()
+
+
+    var inheritedWidgets: MutableMap<KClass<*>, InheritedElement>? = null
+
+    /**
+     * 自分の依存しているInheritedElementを格納する場所
+     *
+     * [Element.deactivate]で自身を依存先のリストから消すために保持
+     */
+    private var dependencies = HashSet<InheritedElement>()
+
+    private fun dependOnInheritedElement(ancestor: InheritedElement): InheritedWidget {
+        dependencies.add(ancestor)
+        ancestor.updateDependencies(this)
+        return ancestor.widget as InheritedWidget
+    }
+
+    override fun <T: InheritedWidget> dependOnInheritedWidgetOfExactType(type: KClass<T>): T? {
+        val ancestor = if(inheritedWidgets == null) null else inheritedWidgets!![type]
+        if(ancestor != null) {
+            return dependOnInheritedElement(ancestor) as T
+        }
+        return null
+    }
+
+    override fun <T: InheritedWidget> getElementForInheritedWidgetOfExactType(type: KClass<T>): InheritedElement? {
+        return if(inheritedWidgets == null) null else inheritedWidgets!![type]
+    }
+
+    protected open fun updateInheritance() {
+        inheritedWidgets = parent?.inheritedWidgets
+    }
 
 
     override operator fun compareTo(other: Element): Int {

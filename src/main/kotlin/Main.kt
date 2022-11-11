@@ -1,17 +1,18 @@
 import engine.runFlume
-import framework.animation.AnimationController
-import framework.animation.TickerProvider
-import framework.animation.TickerProviderImpl
 import framework.element.BuildContext
+import framework.geometrics.Axis
+import framework.render.TextSpan
 import framework.runApp
 import framework.widget.ColoredBox
-import framework.widget.FadeTransition
+import framework.widget.Flex
+import framework.widget.InheritedWidget
 import framework.widget.Listener
+import framework.widget.RichText
 import framework.widget.SizedBox
 import framework.widget.State
 import framework.widget.StatefulWidget
+import framework.widget.StatelessWidget
 import framework.widget.Widget
-import kotlin.time.Duration.Companion.seconds
 
 const val windowWidth = 640
 const val windowHeight = 480
@@ -25,51 +26,74 @@ fun main() {
 }
 
 fun appMain() {
-    runApp(MyStatefulWidget())
+    runApp(HomePage())
 }
 
-class MyStatefulWidget: StatefulWidget() {
-    override fun createState(): State<*> = MyStatefulWidgetState()
+class HomePage : StatefulWidget() {
+    override fun createState(): State<*> = HomePageState()
 }
 
-class MyStatefulWidgetState: State<MyStatefulWidget>(), TickerProvider by TickerProviderImpl() {
-    private val animationController = AnimationController(
-        initialValue = 1.0,
-        duration = 1.seconds,
-        vsync = this
-    )
-    private var isForward = false
-
-    private fun animate() {
-        if(isForward) {
-            animationController.forward(0.0)
-            isForward = false
-        }
-        else {
-            animationController.reverse(1.0)
-            isForward = true
-        }
-    }
+class HomePageState : State<HomePage>() {
+    private var count = 1
 
     override fun build(context: BuildContext): Widget {
-        return SizedBox(
-            child = Listener(
-                child = ColoredBox(
-                    color = 0xFF000000.toInt(),
-                    child = FadeTransition(
-                        opacity = animationController,
-                        child = ColoredBox(
-                            child = null,
-                            color = 0xFF00FF00.toInt()
+        return Inherited(
+            message = createMessage(),
+            child = Flex(
+                children = listOf(
+                    Message(),
+                    SizedBox(
+                        width = 100.0, height = 100.0,
+                        child = Listener(
+                            child = ColoredBox(
+                                child = null, color = 0xFF00FF00.toInt()
+                            ),
+                            onPointerUp = {
+                                setState {
+                                    count++
+                                }
+                            }
                         ),
                     )
                 ),
-                onPointerUp = {
-                    animate()
-                },
-            ),
-            width = 100.0,
-            height = 100.0
+                direction = Axis.Vertical
+            )
         )
     }
+
+    private fun createMessage(): String {
+        val result = when {
+            count % 15 == 0 -> "FizzBuzz"
+            count % 3 == 0 -> "Fizz"
+            count % 5 == 0 -> "Buzz"
+            else -> count.toString()
+        }
+        return result
+    }
+}
+
+class Message : StatelessWidget() {
+    override fun build(context: BuildContext): Widget {
+        return RichText(
+            text = TextSpan(
+                "Message: ${Inherited.of(context, listen = true).message}"
+            )
+        )
+    }
+}
+
+class Inherited(
+    val message: String, child: Widget
+) : InheritedWidget(child) {
+    companion object {
+        fun of(context: BuildContext, listen: Boolean): Inherited {
+            return if(listen) {
+                context.dependOnInheritedWidgetOfExactType(Inherited::class)!!
+            } else {
+                context.getElementForInheritedWidgetOfExactType(Inherited::class)!!.widget as Inherited
+            }
+        }
+    }
+
+    override fun updateShouldNotify(oldWidget: InheritedWidget): Boolean = message != (oldWidget as Inherited).message
 }
