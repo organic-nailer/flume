@@ -1,8 +1,8 @@
 package framework.gesture
 
-import common.math.Matrix4
+import common.Offset
 
 data class HitTestEntry(
     val target: HitTestTarget,
-    var transform: Matrix4? = null
+    var transform: Offset? = null
 )
