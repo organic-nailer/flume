@@ -1,38 +1,25 @@
 package framework.gesture
 
 import common.Offset
-import common.math.Matrix4
-
-sealed interface TransformPart {
-    fun multiply(rightHand: Matrix4): Matrix4
-}
-
-class OffsetTransformPart(
-    val offset: Offset
-): TransformPart {
-    override fun multiply(rightHand: Matrix4): Matrix4 {
-        return rightHand.leftTranslate(offset.dx.toFloat(), offset.dy.toFloat())
-    }
-}
 
 class HitTestResult {
     val path: List<HitTestEntry>
         get() = pathInternal
     private val pathInternal = mutableListOf<HitTestEntry>()
-    private val transforms = mutableListOf(Matrix4.identity)
-    private val localTransforms = mutableListOf<TransformPart>()
+     private val transforms = mutableListOf(Offset.zero)
+     private val localTransforms = mutableListOf<Offset>()
 
     private fun globalizeTransforms() {
         if(localTransforms.isEmpty()) return
         var last = transforms.last()
         for(part in localTransforms) {
-            last = part.multiply(last) // 左から乗算する
+            last = part + last // 左から乗算する
             transforms.add(last)
         }
         localTransforms.clear()
     }
 
-    val lastTransform: Matrix4
+    val lastTransform: Offset
         get() {
             globalizeTransforms()
             return transforms.last()
@@ -44,7 +31,7 @@ class HitTestResult {
     }
 
     fun pushOffset(offset: Offset) {
-        localTransforms.add(OffsetTransformPart(offset))
+        localTransforms.add(offset)
     }
 
     fun popTransform() {
