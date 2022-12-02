@@ -9,5 +9,6 @@ class RenderColoredBox(val color: Int) : RenderProxyBox() {
         if (size.width != 0.0 && size.height != 0.0) {
             context.canvas.drawRect(size.and(offset), Paint().also { it.color = color })
         }
+        child?.paint(context, offset)
     }
 }
